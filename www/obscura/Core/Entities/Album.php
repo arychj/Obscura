@@ -19,7 +19,7 @@
 	 *		Created
 	 */
 
-    PackageManager::Import('Core.Common.Database');
+	PackageManager::Import('Core.Common.Database');
 
 	class Album extends Entity {
 		private $loaded = false;
@@ -78,24 +78,24 @@
 			}
 		}
 
-		public static function Create($title, $description, $mainphoto, $thumbnail){
-			if(get_class($mainphoto) != 'Image')
+		public static function Create($title, $description, $cover, $thumbnail){
+			if(get_class($cover) != 'Image')
 				throw new InvalidArgumentException();	
 			elseif(get_class($thumbnail) != 'Image')
 				throw new InvalidArgumentException();
 
 			$entity = Entity::Create(EntityTypes::Photo, $title, $description);
 			
-			$sth = Database::Prepare("INSERT INTO tblPhotos (id_entity, id_photo, id_thumbnail) VALUES (:id_entity, :id_photo, :id_thumbnail)");
+			$sth = Database::Prepare("INSERT INTO tblPhotos (id_entity, id_cover, id_thumbnail) VALUES (:id_entity, :id_cover, :id_thumbnail)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_photo', $mainphoto->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_cover', $cover->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
 
-			$photo = new Photo($entity->Id, false, $entity);
-			$photo->photo = $photo;
-			$photo->thumbnail = $thumbnail;
+			$album = new Album($entity->Id, false, $entity);
+			$album->cover = $cover;
+			$album->thumbnail = $thumbnail;
 
-			return $photo;
+			return $album;
 		}
 
 		public static function Retrieve($id, $loadImmediately = false){
