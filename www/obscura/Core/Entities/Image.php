@@ -117,12 +117,14 @@
 			else
 				copy($sourcepath, $destpath);
 
+			$exif =Exif::GetExif($destpath);
+
 			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, path, mimetype, width, height, size) VALUES (:id_entity, :path, :mimetype, :width, :height, :size)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
 			$sth->bindValue('path', $filename, PDO::PARAM_STR);
 			$sth->bindValue('mimetype', $mimetype, PDO::PARAM_STR);
-			$sth->bindValue('width', 0, PDO::PARAM_INT);
-			$sth->bindValue('height', 0, PDO::PARAM_INT);
+			$sth->bindValue('width', $exif->Width, PDO::PARAM_INT);
+			$sth->bindValue('height', $exif->Height, PDO::PARAM_INT);
 			$sth->bindValue('size', filesize($destpath), PDO::PARAM_INT);
 			
 			if($sth->execute()){
@@ -131,7 +133,6 @@
 				$image->mimeType = "";
 				$image->dimensions = new Dimensions(0, 0);
 
-				$exif =Exif::GetExif($destpath);
 				$exif->SaveToEntity($image);
 
 				return $image;

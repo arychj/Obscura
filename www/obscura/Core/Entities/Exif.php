@@ -43,6 +43,14 @@
 			return $this->GetExifValue('FocalLength', 0);
 		}
 
+		protected function get_Width(){
+			return $this->GetExifValue('Width', 0);
+		}
+
+		protected function get_Height(){
+			return $this->GetExifValue('Height', 0);
+		}
+
 		protected function get_TimeTaken(){
 			return $this->GetExifValue('TimeTaken', 0);
 		}
@@ -105,6 +113,8 @@
 			$tags['ShutterSpeed'] = $exif['ExposureTime'];
 			$tags['ISO'] = $exif['ISOSpeedRatings'];
 			$tags['FocalLength'] = substr($exif['FocalLength'], 0, -2);
+			$tags['Width'] = $exif['COMPUTED']['Width'];
+			$tags['Height'] = $exif['COMPUTED']['Height'];
 			$tags['TimeTaken'] = $exif['DateTimeOriginal'];
 			$tags['CameraMake'] = $exif['Make'];
 			$tags['CameraModel'] = $exif['Model'];
