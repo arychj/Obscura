@@ -19,9 +19,9 @@
 	 *		Created
 	 */
 
-    PackageManager::Import('Core.Settings');
-    PackageManager::Import('Core.Common.Database');
-    PackageManager::Import('Core.Common.MimeType');
+	PackageManager::Import('Core.Settings');
+	PackageManager::Import('Core.Common.Database');
+	PackageManager::Import('Core.Common.MimeType');
 	PackageManager::Import('Core.Entities.Dimensions');
 	PackageManager::Import('Core.Entities.Exif');
 
