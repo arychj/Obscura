@@ -23,6 +23,7 @@
 	PackageManager::Import('Core.Common.Database');
 	PackageManager::Import('Core.Common.DateTimeSet');
 	PackageManager::Import('Core.Common.Exceptions.EntityException');
+	PackageManager::Import('Core.Entities.Shelf');
 	PackageManager::Import('Core.Entities.TagCollection');
 	PackageManager::Import('Core.Entities.Url');
 
@@ -99,6 +100,17 @@
 			return $this->dates;
 		}
 
+		protected function get_Vars(){
+			return array(
+				'description'	=> $this->Description,
+				'hitcount'		=> $this->HitCount,
+				'id'			=> $this->Id,
+				'title'			=> $this->Title,
+				'tags'			=> $this->Tags->Collection,
+				'url'			=> "{$this->Url}"
+			);
+		}
+
 		protected function get_Tags(){
 			$this->Load();
 			return $this->tags;
@@ -130,13 +142,13 @@
 			if($loadImmediately)
 				$this->Load();
 			elseif($entity != null){
-				$this->id = $entity->id;
-				$this->type = $entity->type;
-				$this->title = $entity->title;
-				$this->description = $entity->description;
-				$this->hitcount = $entity->hitcount;
-				$this->dates = $entity->dates;
-				$this->active = $entity->active;
+				$this->id			= $entity->id;
+				$this->type			= $entity->type;
+				$this->title		= $entity->title;
+				$this->description	= $entity->description;
+				$this->hitcount		= $entity->hitcount;
+				$this->dates		= $entity->dates;
+				$this->active		= $entity->active;
 
 				$this->loaded = true;
 			}
@@ -178,7 +190,15 @@
 		}
 
 		public function ToXml(){
+			$xml = new SimpleXMLElement("<{$this->Type}/>");
+			foreach($this->Vars as $var => $val)
+				$xml->addChild($var, $val);
 
+			print $xml->asXML();
+		}
+
+		public function ToJson($vars = null){
+			return str_replace('\/', '/', json_encode($this->Vars));
 		}
 		
 		private function Load(){
@@ -196,16 +216,7 @@
 					$this->dates = new DateTimeSet($details->CreatedOn, $details->ModifiedOn);
 					$this->active = $details->IsActive;
 
-					$sthTags = Database::Prepare("SELECT Tag FROM vwEntityTags WHERE EntityId = :id");
-					$sthTags->bindParam('id', $this->id, PDO::PARAM_INT);
-					$sthTags->setFetchMode(PDO::FETCH_OBJ);
-					$sthTags->execute();
-
-					$tags = array();
-					while(($tag = $sthTags->fetch()) != null)
-						$tags[] = $tag->Tag;
-
-					$this->tags = new TagCollection($this, $tags);
+					$this->tags = new TagCollection($this->id);
 
 					$this->loaded = true;
 				}
@@ -235,8 +246,15 @@
 				throw new EntityException("Unable to create Entity.");
 		}
 
-		public static function Retrieve($id, $loadImmediately = false){
-			return new Entity($id, $loadImmediately);
+		protected static function Retrieve($id, $loadImmediately = false){
+			$entity = Shelf::Unshelve(ShelfType::Entity, $id);
+
+			if($entity == null){
+				$entity = new Entity($id, $loadImmediately);
+				Shelf::Shelve(ShelfType::Entity, $id, $entity);
+			}
+
+			return $entity;
 		}
 
 		public static function All(){

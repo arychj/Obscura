@@ -22,6 +22,7 @@
 	PackageManager::Import('Core.Settings');
 	PackageManager::Import('Core.Common.Database');
 	PackageManager::Import('Core.Common.MimeType');
+	PackageManager::Import('Core.Entities.Entity');
 	PackageManager::Import('Core.Entities.Dimensions');
 	PackageManager::Import('Core.Entities.Exif');
 
@@ -46,7 +47,7 @@
 
 		protected function get_MimeType(){
 			$this->Load();
-			return $this->mimetype;
+			return $this->mimeType;
 		}
 
 		protected function get_FilePath(){
@@ -59,6 +60,15 @@
 			return $this->html;
 		}
 
+		protected function get_Vars(){
+			return array_merge(
+				array(
+					'dimensions' => $this->Dimensions->Vars
+				),
+				parent::get_Vars()
+			);
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($id, $loadImmediately = false, $entity = null){
@@ -69,6 +79,14 @@
 				if($loadImmediately)
 					$this->Load();	
 			}
+		}
+
+		public function Display(){
+			$imageDirectory = Settings::GetSetting('ImageDirectory');
+
+			header("Content-type: {$this->MimeType}", true);
+			readfile("$imageDirectory/{$this->FilePath}");
+			exit();
 		}
 
 		public function ToXml(){

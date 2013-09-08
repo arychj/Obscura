@@ -24,12 +24,19 @@
 	class Dimensions extends AccessorClass {
 		private $width, $height;
 
-		public function get_Width(){
+		protected function get_Width(){
 			return $this->width;
 		}
 
-		public function get_Height(){
+		protected function get_Height(){
 			return $this->height;
+		}
+
+		protected function get_Vars(){
+			return array(
+				'width'		=> $this->Width,
+				'height'	=> $this->Height
+			);
 		}
 
 		public function __construct($width, $height){

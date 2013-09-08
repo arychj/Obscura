@@ -20,6 +20,9 @@
 	 */
 
 	PackageManager::Import('Core.Common.Database');
+	PackageManager::Import('Core.Entities.Entity');
+	PackageManager::Import('Core.Entities.EntityCollection');
+	PackageManager::Import('Core.Entities.Image');
 
 	class Album extends Entity {
 		private $loaded = false;
@@ -44,6 +47,16 @@
 			return $this->photos;
 		}
 
+		protected function get_Vars(){
+			$this->Load();
+			return array_merge(array(
+				'cover'		=> "{$this->Cover->Url}",
+				'thumbnail'	=> "{$this->Thumbnail->Url}",
+				'photos'	=> $this->Photos->Vars
+			),
+			parent::get_Vars());
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($id, $loadImmediately = false, $entity = null){
@@ -56,10 +69,6 @@
 			}
 		}
 
-		public function ToXml(){
-
-		}
-		
 		private function Load(){
 			if(!$this->loaded){
 				$sth = Database::Prepare("SELECT id_cover, id_thumbnail FROM tblAlbums where id_entity = :id");
@@ -69,6 +78,7 @@
 				if(($details = $sth->fetch()) != null){
 					$this->image = Image::Retrieve($details->id_cover);
 					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
+					$this->photos = new EntityCollection($this->id, EntityTypes::Photo);
 
 					$this->loaded = true;
 				}

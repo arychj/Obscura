@@ -20,6 +20,9 @@
 	 */
 
     PackageManager::Import('Core.Common.Database');
+    PackageManager::Import('Core.Entities.Entity');
+    PackageManager::Import('Core.Entities.EntityCollection');
+    PackageManager::Import('Core.Entities.Image');
 
 	class Photo extends Entity {
 		private $loaded = false;
@@ -44,6 +47,18 @@
 			return $this->resolutions;
 		}
 
+		protected function get_Vars(){
+			$this->Load();
+			return array_merge(
+				array(
+					'photo'			=> $this->Photo->Vars,
+					'thumbnail'		=> $this->Thumbnail->Vars,
+					'resolutions'	=> $this->Resolutions->Vars
+				),
+				parent::get_Vars()
+			);
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($id, $loadImmediately = false, $entity = null){
@@ -56,10 +71,6 @@
 			}
 		}
 
-		public function ToXml(){
-
-		}
-		
 		private function Load(){
 			if(!$this->loaded){
 				$sth = Database::Prepare("SELECT id_photo, id_thumbnail FROM tblPhotos where id_entity = :id");
@@ -67,8 +78,9 @@
 				$sth->execute();
 
 				if(($details = $sth->fetch()) != null){
-					$this->image = Image::Retrieve($details->id_photo);
-					$this->thumbnail = Image::Retrieve$details->id_thumbnail);
+					$this->photo = Image::Retrieve($details->id_photo);
+					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
+					$this->resolutions = EntityCollection::Retrieve($this->id, EntityTypes::Image);
 
 					$this->loaded = true;
 				}

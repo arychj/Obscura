@@ -54,11 +54,11 @@
 			$format = Settings::GetSetting($key);
 
 			if($format != null){
-				return DataTools::BuildString($format, array(
+				return rtrim(DataTools::BuildString($format, array(
 					'base' => Settings::GetSetting('UrlBase'),
 					'id' => $this->entity->Id,
 					'title' => str_replace(' ', '-', $this->entity->title)
-				));
+				)), '-');
 			}
 			else{
 //TODO: Bad Format

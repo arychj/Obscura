@@ -23,7 +23,7 @@
 	PackageManager::Import('Core.Common.Database');
 
 	class EntityCollection extends AccessorClass {
-		private $entity;
+		private $entityid;
 		private $members;
 		private $memberType;
 
@@ -33,19 +33,28 @@
 			return $members;
 		}
 
+		protected function get_Vars(){
+			$vars = array();
+
+			foreach($this->members as $member)
+				$vars[] = $member->Vars;
+
+			return $vars;
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($entity, $memberType){
-			$this->entity = $entity;
+			$this->entityid = (is_numeric($entity) ? $entity : $entity->Id);
 			$this->memberType = $memberType;
 
 			$sth = Database::Prepare("SELECT id_member FROM tblMemberMap WHERE id_entity = :id_entity");
-			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
 			$sth->execute();
 
 			$this->members = array();
 			while(($member = $sth->fetch()) != null)
-				$this->members[$member->id_member] = $this->GetMember($memberType, $member->id_member);
+				$this->members[$member->id_member] = $this->GetMember($member->id_member);
 		}
 
 		public function ContainsId($id){
@@ -56,15 +65,20 @@
 			return $this->ContainsId($entity->Id());
 		}
 
-		public function Add($entity){
-			
+		public function Add($member){
+			$memberid = (is_numeric($member) ? $member : $member->Id);
+
+			$sth = Database::Prepare("INSERT IGNORE INTO tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
+			$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
+			$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
+			$sth->execute();
 		}
 
 		public function Remove($member){
-			$memberid = (is_int($member) ? $member : $member->Id);
+			$memberid = (is_numeric($member) ? $member : $member->Id);
 
 			$sth = Database::Prepare("DELETE FROM tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
-			$sth->bindValue('id_entity', $this->entity->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
 			$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
 			$sth->execute();
 
@@ -75,21 +89,19 @@
 
 		}
 
-		private static GetMember($type, $id){
-			switch($type){
-				case EntityType::Image: return Image::Retrieve($id);
-				case EntityType::Photo: return Photo::Retrieve($id);
-				case EntityType::Album: return Album::Retrieve($id);
-				case EntityType::Collection: return Journal::Retrieve($id);
-				case EntityType::Video: return Video::Retrieve($id);
-				case EntityType::Journal: return Journal::Retrieve($id);
+		private function GetMember($id){
+			switch($this->memberType){
+				case EntityTypes::Image: return Image::Retrieve($id);
+				case EntityTypes::Photo: return Photo::Retrieve($id);
+				case EntityTypes::Album: return Album::Retrieve($id);
+				case EntityTypes::Collection: return Journal::Retrieve($id);
+				case EntityTypes::Video: return Video::Retrieve($id);
+				case EntityTypes::Journal: return Journal::Retrieve($id);
 			}
 		}
 
-		public static function Retrieve($entity){
-			$entityid = (is_int($entity) ? $entity : $entity->Id);
-
-
+		public static function Retrieve($id, $memberType){
+			return new EntityCollection($id, $memberType);
 		}
 	}
 

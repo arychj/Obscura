@@ -20,18 +20,27 @@
 	 */
 
 	PackageManager::Import('Core.Common.AccessorClass');
+	PackageManager::Import('Core.Common.Database');
 
 	class TagCollection extends AccessorClass {
-		private $entity;
+		private $entityid;
 		private $tags;
 
 		public function get_Collection(){
 			return $this->tags;
 		}
 
-		public function __construct(&$entity, &$tags = null){
-			$this->entity = $entity;
-			$this->tags = ($tags == null ? array() : $tags);
+		public function __construct($entity){
+			$this->entityid = (is_numeric($entity) ? $entity : $entity->Id);
+
+			$sth = Database::Prepare("SELECT Tag FROM vwEntityTags WHERE EntityId = :id");
+			$sth->bindValue('id', $this->entityid, PDO::PARAM_INT);
+			$sth->setFetchMode(PDO::FETCH_OBJ);
+			$sth->execute();
+
+			$this->tags = array();
+			while(($tag = $sth->fetch()) != null)
+				$this->tags[] = $tag->Tag;
 		}
 
 		public function Contains($tag){
@@ -39,10 +48,26 @@
 		}
 
 		public function Add($tag){
-
+			if(!in_array($tag, $this->tags)){
+				$sth = Database::Prepare("INSERT IGNORE INTO tblTags (id_entity, id_tag) VALUES (:id_entity, (SELECT id FROM tblTagTypes WHERE name = :tag))");
+				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
+				$sth->bindValue('tag', $tag, PDO::PARAM_STR);
+				
+				if($sth->execute())
+					$this->tags[] = $tag;
+			}
 		}
 
 		public function Remove($tag){
+			if(!in_array($tag, $this->tags)){
+				$sth = Database::Prepare("DELETE FROM tblTags id_entity = :id_entity AND  id_tag = (SELECT id FROM tblTagTypes WHERE name = :tag))");
+				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
+				$sth->bindValue('tag', $tag, PDO::PARAM_STR);
+				
+				if($sth->execute())
+					if(($index = array_search($tag, $this->tags)) !== false)
+						unset($this->tags[$index]);
+			}
 
 		}
 	}
