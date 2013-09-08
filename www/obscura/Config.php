@@ -11,13 +11,13 @@
 	 *	this stuff is worth it, you can buy me a beer in return. Erik J. Olson.
 	 *	-----------------------------------------------------------------------------
 	 *
-	 *	~/config.inc.php
+	 *	Config.php
 	 *	Contains configuration variables for the site. Duh?
 	 *
 	 *	@changelog
 	 */
 
-	class Config{
+	class Config {
 		const Debug = true;
 
 		const DatabaseType = 'MySQL';
@@ -27,5 +27,6 @@
 		const DatabaseUsername = 'root';
 		const DatabasePassword = '';
 
+		const TemplateDirectory = '/data/www/dev/obscura/www/obscura/Templates';
 	}
 ?>
