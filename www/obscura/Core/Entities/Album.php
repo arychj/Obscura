@@ -50,8 +50,8 @@
 		protected function get_Vars(){
 			$this->Load();
 			return array_merge(array(
-				'cover'		=> "{$this->Cover->Url}",
-				'thumbnail'	=> "{$this->Thumbnail->Url}",
+				'cover'		=> $this->Cover->Vars,
+				'thumbnail'	=> $this->Thumbnail->Vars,
 				'photos'	=> $this->Photos->Vars
 			),
 			parent::get_Vars());
@@ -76,9 +76,9 @@
 				$sth->execute();
 
 				if(($details = $sth->fetch()) != null){
-					$this->image = Image::Retrieve($details->id_cover);
+					$this->cover = Image::Retrieve($details->id_cover);
 					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
-					$this->photos = new EntityCollection($this->id, EntityTypes::Photo);
+					$this->photos = EntityCollection::Retrieve($this->id, EntityTypes::Photo);
 
 					$this->loaded = true;
 				}

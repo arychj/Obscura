@@ -49,11 +49,11 @@
 
 		protected function get_Vars(){
 			return array_merge(array(
-				'cover'		=> $this->Cover,
-				'thumbnail'	=> $this->Thumbnail,
+				'cover'		=> $this->Cover->Vars,
+				'thumbnail'	=> $this->Thumbnail->Vars,
 				'albums'	=> $this->Albums->Vars
 			),
-			parent::get_Vars()
+			parent::get_Vars());
 		}
 
 		/*** end accessors ***/
@@ -71,13 +71,13 @@
 		private function Load(){
 			if(!$this->loaded){
 				$sth = Database::Prepare("SELECT id_cover, id_thumbnail FROM tblCollections where id_entity = :id");
-				$sth->bindValue('id', $this->Id, PDO::PARAM_INT);
+				$sth->bindValue('id', $this->id, PDO::PARAM_INT);
 				$sth->execute();
 
 				if(($details = $sth->fetch()) != null){
-					$this->image = Image::Retrieve($details->id_cover);
+					$this->cover = Image::Retrieve($details->id_cover);
 					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
-					$this->albums = new EntityCollection($this->id, EntityTypes::Album);
+					$this->albums = EntityCollection::Retrieve($this->id, EntityTypes::Album);
 
 					$this->loaded = true;
 				}
@@ -109,10 +109,6 @@
 
 		public static function Retrieve($id, $loadImmediately = false){
 			return new Collection($id, $loadImmediately);
-		}
-
-		public static function All(){
-
 		}
 	}
 

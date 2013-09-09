@@ -85,6 +85,7 @@
 			$imageDirectory = Settings::GetSetting('ImageDirectory');
 
 			header("Content-type: {$this->MimeType}", true);
+			header("Cache-Control: max-age=2592000", true); //30 days
 			readfile("$imageDirectory/{$this->FilePath}");
 			exit();
 		}
