@@ -23,22 +23,13 @@
 	PackageManager::Import('Core.Settings');
 	PackageManager::Import('Core.Common.AccessorClass');
 	PackageManager::Import('Core.Common.Exceptions.TemplateException');
+	PackageManager::Import('Core.Web.Security');
 
 	class TemplateManager extends AccessorClass {
 		var $template;
-		var $subTemplate;
 
-		protected function get_SubTemplate() {
-			return $this->subTemplate;
-		}
-
-		protected function set_SubTemplate($value) {
-			$this->subTemplate = $value;
-		}
-
-		public function __construct($subTemplate = null) {
-			$this->template = Settings::GetSetting('Template');
-			$this->subTemplate = $subTemplate;
+		public function __construct($template = null) {
+			$this->template = ($template == null ? Settings::GetSetting('Template') : $template);
 
 			$templatePath = Config::TemplateDirectory . '/' . $this->template;
 
@@ -46,12 +37,16 @@
 				throw new TemplateException("Specified template '$template' not found.");
 		}
 
-		public function Write($vars) {
-			$subTemplate = self::Compile($this->GetTemplate($this->subTemplate), $vars);
+		public function Write($subtemplate, $vars) {
+			$security = new Security();
+
+			$subTemplate = self::Compile($this->GetTemplate($subtemplate), $vars);
 			$template = self::Compile($this->GetTemplate('Main'), array(
 				'templatepath' => Settings::GetSetting('TemplateBaseUrl') . '/' . $this->template,
 				'sitetitle' => Settings::GetSetting('SiteTitle'),
+				'pagename' => substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4),
 				'pagetitle' => $vars['title'],
+				'username' => $security->Username,
 				'content' => $subTemplate
 			));
 
@@ -82,6 +77,8 @@
 				if(is_array($val)){
 					if(ctype_digit(implode('', array_keys($val))))
 						@$flat["$prefix$var"] = implode(',', $val);
+					elseif(sizeof($val) == 0)
+						$flat["$prefix$var"] = '';
 					else
 						$flat += self::FlattenArray($val, "$prefix$var-");
 				}
