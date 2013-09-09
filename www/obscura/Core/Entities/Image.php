@@ -31,7 +31,7 @@
 
 		private $dimensions;
 		private $exif;
-		private $mimeType, $filePath, $html;
+		private $mimeType, $extension, $filePath, $html;
 
 		/*** accessors ***/
 
@@ -50,9 +50,19 @@
 			return $this->mimeType;
 		}
 
+		protected function get_Extension(){
+			$this->Load();
+			return $this->extension;
+		}
+
 		protected function get_FilePath(){
 			$this->Load();
 			return $this->filePath;
+		}
+
+		protected function get_Url(){
+			$this->Load();
+			return parent::get_Url() . ".{$this->extension}";
 		}
 
 		protected function get_Html(){
@@ -96,13 +106,14 @@
 		
 		private function Load(){
 			if(!$this->loaded){
-				$sth = Database::Prepare("SELECT path, mimeType, width, height FROM tblImages where id_entity = :id");
+				$sth = Database::Prepare("SELECT path, mimeType, extension, width, height FROM tblImages where id_entity = :id");
 				$sth->bindValue('id', $this->Id, PDO::PARAM_INT);
 				$sth->execute();
 
 				if(($image = $sth->fetch()) != null){
 					$this->filePath = $image->path;
 					$this->mimeType = $image->mimeType;
+					$this->extension = $image->extension;
 					$this->dimensions = new Dimensions($image->width, $image->height);
 
 					$sthExif = Database::Prepare("SELECT name FROM Type, Value FROM vwImageExifData WHERE EntityId = :id_entity");
@@ -138,10 +149,11 @@
 
 			$exif =Exif::GetExif($destpath);
 
-			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, path, mimetype, width, height, size) VALUES (:id_entity, :path, :mimetype, :width, :height, :size)");
+			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, path, mimetype, extension, width, height, size) VALUES (:id_entity, :path, :mimetype, :extension, :width, :height, :size)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
 			$sth->bindValue('path', $filename, PDO::PARAM_STR);
 			$sth->bindValue('mimetype', $mimetype, PDO::PARAM_STR);
+			$sth->bindValue('extension', $extension, PDO::PARAM_STR);
 			$sth->bindValue('width', $exif->Width, PDO::PARAM_INT);
 			$sth->bindValue('height', $exif->Height, PDO::PARAM_INT);
 			$sth->bindValue('size', filesize($destpath), PDO::PARAM_INT);
