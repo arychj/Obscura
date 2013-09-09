@@ -23,18 +23,10 @@
 	PackageManager::Import('Core.Common.Database');
 	PackageManager::Import('Core.Common.DateTimeSet');
 	PackageManager::Import('Core.Common.Exceptions.EntityException');
+	PackageManager::Import('Core.Entities.EntityTypes');
 	PackageManager::Import('Core.Entities.Shelf');
 	PackageManager::Import('Core.Entities.TagCollection');
 	PackageManager::Import('Core.Entities.Url');
-
-	class EntityTypes {
-		const Image = "Image";
-		const Photo = "Photo";
-		const Album = "Album";
-		const Collection = "Collection";
-		const Journal = "Journal";
-		const Video = "Video";
-	}
 
 	class Entity extends AccessorClass{
 		private $loaded = false;
@@ -102,11 +94,20 @@
 
 		protected function get_Vars(){
 			return array(
-				'description'	=> $this->Description,
-				'hitcount'		=> $this->HitCount,
 				'id'			=> $this->Id,
 				'title'			=> $this->Title,
+				'description'	=> $this->Description,
+				'hitcount'		=> $this->HitCount,
 				'tags'			=> $this->Tags->Collection,
+				'url'			=> "{$this->Url}"
+			);
+		}
+
+		protected function get_ShortVars(){
+			return array(
+				'id'			=> $this->Id,
+				'title'			=> $this->Title,
+				'description'	=> $this->Description,
 				'url'			=> "{$this->Url}"
 			);
 		}
@@ -246,6 +247,21 @@
 				throw new EntityException("Unable to create Entity.");
 		}
 
+		public static function Build($id, $typeid, $type, $title, $description, $hitcount, $dtCreated, $dtModified, $active){
+			$entity = new Entity($id, false);
+
+			$entity->typeid = $typeid;
+			$entity->type = $type;
+			$entity->title = $title;
+			$entity->description = $description;
+			$entity->hitcount = $hitcount;
+			$entity->dates = new DateTimeSet($dtCreated, $dtModified);
+			$entity->active = $active;
+			$entity->loaded = true;
+
+			return $entity;
+		}
+
 		protected static function Retrieve($id, $loadImmediately = false){
 			$entity = Shelf::Unshelve(ShelfType::Entity, $id);
 
@@ -255,10 +271,6 @@
 			}
 
 			return $entity;
-		}
-
-		public static function All(){
-
 		}
 	}
 

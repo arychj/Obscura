@@ -21,6 +21,8 @@
 
 	PackageManager::Import('Core.Common.AccessorClass');
 	PackageManager::Import('Core.Common.Database');
+	PackageManager::Import('Core.Entities.Entity');
+	PackageManager::Import('Core.Entities.EntityTypes');
 
 	class EntityCollection extends AccessorClass {
 		private $entityid;
@@ -30,14 +32,14 @@
 		/*** accessors ***/
 
 		protected function get_Members(){
-			return $members;
+			return $this->members;
 		}
 
 		protected function get_Vars(){
 			$vars = array();
 
 			foreach($this->members as $member)
-				$vars[] = $member->Vars;
+				$vars[] = $member->ShortVars;
 
 			return $vars;
 		}
@@ -45,16 +47,40 @@
 		/*** end accessors ***/
 
 		protected function __construct($entity, $memberType){
-			$this->entityid = (is_numeric($entity) ? $entity : $entity->Id);
 			$this->memberType = $memberType;
 
-			$sth = Database::Prepare("SELECT id_member FROM tblMemberMap WHERE id_entity = :id_entity");
-			$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
-			$sth->execute();
+			if($entity == null){
+				$this->entityid = null;
 
-			$this->members = array();
-			while(($member = $sth->fetch()) != null)
-				$this->members[$member->id_member] = $this->GetMember($member->id_member);
+				$sth = Database::Prepare("SELECT id, id_type, title, description, hits, dtCreated, dtModified, tfActive FROM tblEntities WHERE id_type = (SELECT id FROM tblEntityTypes WHERE name = :type)");
+				$sth->bindParam('type', $memberType, PDO::PARAM_STR);
+				$sth->execute();
+
+				$this->members = array();
+				while(($member = $sth->fetch()) != null)
+					$this->members[$member->id] = Entity::Build(
+						$member->id,
+						$member->id_type,
+						$memberType,
+						$member->title,
+						$member->description,
+						$member->hits,
+						$member->dtCreated,
+						$member->dtModified,
+						$member->tfActive
+					);
+			}
+			else{
+				$this->entityid = (is_numeric($entity) ? $entity : $entity->Id);
+
+				$sth = Database::Prepare("SELECT id_member FROM tblMemberMap WHERE id_entity = :id_entity");
+				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
+				$sth->execute();
+
+				$this->members = array();
+				while(($member = $sth->fetch()) != null)
+					$this->members[$member->id_member] = $this->GetMember($member->id_member);
+			}
 		}
 
 		public function ContainsId($id){
@@ -66,23 +92,31 @@
 		}
 
 		public function Add($member){
-			$memberid = (is_numeric($member) ? $member : $member->Id);
+			if($this->entityid != null){
+				$memberid = (is_numeric($member) ? $member : $member->Id);
 
-			$sth = Database::Prepare("INSERT IGNORE INTO tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
-			$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
-			$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
-			$sth->execute();
+				$sth = Database::Prepare("INSERT IGNORE INTO tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
+				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
+				$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
+				$sth->execute();
+			}
+			else
+				throw new EntityCollectionException("A member cannot be added to a global collection.");
 		}
 
 		public function Remove($member){
-			$memberid = (is_numeric($member) ? $member : $member->Id);
+			if($this->entityid != null){
+				$memberid = (is_numeric($member) ? $member : $member->Id);
 
-			$sth = Database::Prepare("DELETE FROM tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
-			$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
-			$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
-			$sth->execute();
+				$sth = Database::Prepare("DELETE FROM tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
+				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
+				$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
+				$sth->execute();
 
-			unset($this->members[$member->Id]);
+				unset($this->members[$member->Id]);
+			}
+			else
+				throw new EntityCollectionException("A member cannot be removed from a global collection.");
 		}
 
 		public function ToXml($start = 0, $size = 0){
@@ -102,6 +136,10 @@
 
 		public static function Retrieve($id, $memberType){
 			return new EntityCollection($id, $memberType);
+		}
+
+		public static function All($memberType){
+			return new EntityCollection(null, $memberType);
 		}
 	}
 
