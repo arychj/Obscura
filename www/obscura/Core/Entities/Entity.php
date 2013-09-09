@@ -93,17 +93,20 @@
 		}
 
 		protected function get_Vars(){
+			$this->Load();
 			return array(
 				'id'			=> $this->Id,
 				'title'			=> $this->Title,
 				'description'	=> $this->Description,
 				'hitcount'		=> $this->HitCount,
 				'tags'			=> $this->Tags->Collection,
-				'url'			=> "{$this->Url}"
+				'url'			=> "{$this->Url}",
+				'dates'			=> $this->dates->Vars
 			);
 		}
 
 		protected function get_ShortVars(){
+			$this->Load();
 			return array(
 				'id'			=> $this->Id,
 				'title'			=> $this->Title,

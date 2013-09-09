@@ -32,6 +32,13 @@
 			return $this->modified;
 		}
 
+		protected function get_Vars(){
+			return array(
+				'created' => $this->created,
+				'modified' => $this->modified
+			);
+		}
+
 		protected function set_Modified($value){
 			$this->modified = $value;
 		}
