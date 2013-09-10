@@ -24,7 +24,7 @@
 	PackageManager::Import('Core.Common.MimeType');
 	PackageManager::Import('Core.Entities.Entity');
 	PackageManager::Import('Core.Entities.Dimensions');
-	PackageManager::Import('Core.Entities.Exif');
+	PackageManager::Import('Core.Entities.ExifCollection');
 
 	class Image extends Entity {
 		private $loaded = false;
@@ -124,16 +124,7 @@
 					$this->mimeType = $image->mimeType;
 					$this->extension = $image->extension;
 					$this->dimensions = new Dimensions($image->width, $image->height);
-
-					$sthExif = Database::Prepare("SELECT name FROM Type, Value FROM vwImageExifData WHERE EntityId = :id_entity");
-					$sthExif->bindValue('id_entity', $this->Id, PDO::PARAM_INT);
-					if($sth->execute()){
-						$exifTags = array();
-						while(($exifTag = $sthExif->fetch()) != null)
-							$exifTags[$exifTag->Type] = $exif->Value;
-
-						$this->exif = new Exif($exifTags);
-					}
+					$this->exif = ExifCollection::FromEntity($this);
 
 					$this->loaded = true;
 				}
@@ -143,7 +134,7 @@
 			}
 		}
 
-		public static function Create($sourcepath){
+		public static function Create($sourcepath, $saveExif = false){
 			$entity = Entity::Create(EntityTypes::Image, '', '');
 
 			$extension = pathinfo($sourcepath, PATHINFO_EXTENSION);
@@ -156,7 +147,7 @@
 			else
 				copy($sourcepath, $destpath);
 
-			$exif =Exif::GetExif($destpath);
+			$exif = ExifCollection::GetExif($destpath);
 
 			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, path, mimetype, extension, width, height, size) VALUES (:id_entity, :path, :mimetype, :extension, :width, :height, :size)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
@@ -172,8 +163,10 @@
 				$image->filePath = $sourcepath;
 				$image->mimeType = "";
 				$image->dimensions = new Dimensions(0, 0);
+				$image->exif = $exif;
 
-				$exif->SaveToEntity($image);
+				if($saveExif)
+					$exif->SaveToEntity($image);
 
 				return $image;
 			}
