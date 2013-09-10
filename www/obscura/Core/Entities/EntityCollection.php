@@ -21,7 +21,7 @@
 
 	PackageManager::Import('Core.Common.AccessorClass');
 	PackageManager::Import('Core.Common.Database');
-	PackageManager::Import('Core.Entities.Entity');
+	PackageManager::Import('Core.Entities.*');
 	PackageManager::Import('Core.Entities.EntityTypes');
 
 	class EntityCollection extends AccessorClass {
