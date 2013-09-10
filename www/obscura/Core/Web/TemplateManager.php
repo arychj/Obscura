@@ -22,6 +22,7 @@
 	PackageManager::Import('Config');
 	PackageManager::Import('Core.Settings');
 	PackageManager::Import('Core.Common.AccessorClass');
+	PackageManager::Import('Core.Common.DataTools');
 	PackageManager::Import('Core.Common.Exceptions.TemplateException');
 	PackageManager::Import('Core.Web.Security');
 
@@ -29,7 +30,7 @@
 		var $template;
 
 		public function __construct($template = null) {
-			$this->template = ($template == null ? Settings::GetSetting('Template') : $template);
+			$this->template = ($template == null ? Settings::GetSettingValue('Template') : $template);
 
 			$templatePath = Config::TemplateDirectory . '/' . $this->template;
 
@@ -37,17 +38,21 @@
 				throw new TemplateException("Specified template '$template' not found.");
 		}
 
-		public function Write($subtemplate, $vars) {
+		public function Write($subtemplate, $vars = null) {
 			$security = new Security();
 
-			$subTemplate = self::Compile($this->GetTemplate($subtemplate), $vars);
-			$template = self::Compile($this->GetTemplate('Main'), array(
-				'templatepath' => Settings::GetSetting('TemplateBaseUrl') . '/' . $this->template,
-				'sitetitle' => Settings::GetSetting('SiteTitle'),
+			if($vars == null)
+				$vars = array();
+
+			$template = self::Compile($this->GetTemplate('Main'), array_merge(array(
+				'content' => $this->GetTemplate($subtemplate),
+				'templatepath' => Settings::GetSettingValue('TemplateBaseUrl') . '/' . $this->template,
+				'sitetitle' => Settings::GetSettingValue('SiteTitle'),
 				'pagename' => substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1, -4),
-				'pagetitle' => $vars['title'],
-				'username' => $security->Username,
-				'content' => $subTemplate
+				'pagetitle' => (isset($vars['title']) ? $vars['title'] : $subtemplate),
+				'username' => $security->Username
+				),
+				$vars
 			));
 
 			echo $template;
@@ -63,9 +68,10 @@
 		}
 
 		public static function Compile($template, $vars) {
-			$vars = self::FlattenArray($vars);
-			foreach($vars as $var => $val)
-				$template = str_replace('{' . $var . '}', $val, $template);
+			if($vars != null){
+				$vars = self::FlattenArray($vars);
+				$template = DataTools::BuildString($template, $vars);
+			}
 
 			return $template;
 		}
