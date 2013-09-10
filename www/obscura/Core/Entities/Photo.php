@@ -102,18 +102,32 @@
 			}
 		}
 
-		public function Update($title, $description, $mainphoto, $thumbnail, $active){
+		public function Update($title, $description, $photo, $thumbnail, $active){
+			if(get_class($photo) != 'Image')
+				throw new InvalidArgumentException();	
+			elseif(get_class($thumbnail) != 'Image')
+				throw new InvalidArgumentException();
+
 			$this->Load();
 			parent::Update($title, $description, $active);
 
 			$sth = Database::Prepare("UPDATE tblPhotos SET id_photo = :id_photo, id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
 			$sth->bindValue('id_entity', $this->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_photo', ($mainphoto == null ? $this->photo->Id : $mainphoto->Id), PDO::PARAM_INT);
+			$sth->bindValue('id_photo', ($photo == null ? $this->photo->Id : $photo->Id), PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', ($thumbnail == null ? $this->thumbnail->Id : $thumbnail->Id), PDO::PARAM_INT);
+
+			if($sth->execute()){
+				if($photo != null)
+					$this->photo = $photo;
+				if($thumbnail != null)
+					$this->thumbnail = $thumbnail;
+			}
+			else
+				throw new EntityException("Error updating Photo Id: {$this->id}");
 		}
 
-		public static function Create($title, $description, $mainphoto, $thumbnail){
-			if(get_class($mainphoto) != 'Image')
+		public static function Create($title, $description, $photo, $thumbnail){
+			if(get_class($photo) != 'Image')
 				throw new InvalidArgumentException();	
 			elseif(get_class($thumbnail) != 'Image')
 				throw new InvalidArgumentException();
@@ -122,7 +136,7 @@
 			
 			$sth = Database::Prepare("INSERT INTO tblPhotos (id_entity, id_photo, id_thumbnail) VALUES (:id_entity, :id_photo, :id_thumbnail)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_photo', $mainphoto->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_photo', $photo->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
 
 			$photo = new Photo($entity->Id, false, $entity);
