@@ -45,7 +45,7 @@
 		}
 
 		public static function All(){
-			$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted AS IsEncrypted FROM tblSettings');
+			$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted AS IsEncrypted FROM tblSettings ORDER BY name ASC');
 			$sth->execute();
 
 			$settings = array();
@@ -71,7 +71,31 @@
 		}
 
 		public static function UpdateSetting($id, $name, $value, $isEncrypted){
+			if($id == -1){
+				$sth = Database::Prepare("INSERT INTO tblSettings (name, value, tfEncrypted) VALUES (:name, :value, :isEncrypted)");
+				$sth->bindValue('name', $name, PDO::PARAM_STR);
+				$sth->bindValue('value', $value, PDO::PARAM_STR);
+				$sth->bindValue('isEncrypted', $isEncrypted, PDO::PARAM_BOOL);
+				$sth->execute();
 
+				return Database::LastInsertId();
+			}
+			else{
+				$sth = Database::Prepare("UPDATE tblSettings SET name = :name, value = :value, tfEncrypted = :isEncrypted WHERE id = :id");
+				$sth->bindValue('id', $id, PDO::PARAM_INT);
+				$sth->bindValue('name', $name, PDO::PARAM_STR);
+				$sth->bindValue('value', $value, PDO::PARAM_STR);
+				$sth->bindValue('isEncrypted', $isEncrypted, PDO::PARAM_BOOL);
+				$sth->execute();
+
+				return $id;
+			}
+		}
+
+		public static function DeleteSetting($id){
+			$sth = Database::Prepare("DELETE FROM tblSettings WHERE id = :id");
+			$sth->bindValue('id', $id, PDO::PARAM_INT);
+			$sth->execute();
 		}
 	}
 
