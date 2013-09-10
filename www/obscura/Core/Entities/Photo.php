@@ -51,12 +51,24 @@
 			$this->Load();
 			return array_merge(
 				array(
-					'photo'			=> $this->Photo->Vars,
-					'thumbnail'		=> $this->Thumbnail->Vars,
+					'photo'			=> $this->Photo->ShortVars,
+					'thumbnail'		=> $this->Thumbnail->ShortVars,
 					'resolutions'	=> $this->Resolutions->Vars
 				),
 				parent::get_Vars()
 			);
+		}
+
+		protected function set_Photo($value){
+			$this->Load();
+			$this->Update(null, null, $value, null, null);
+			$this->photo = $value;
+		}
+
+		protected function set_Thumbnail($value){
+			$this->Load();
+			$this->Update(null, null, null, $value, null);
+			$this->thumbnail = $value;
 		}
 
 		/*** end accessors ***/
@@ -88,6 +100,16 @@
 					throw new EntityException("Invalid Photo Id: {$this->id}");
 				}
 			}
+		}
+
+		public function Update($title, $description, $mainphoto, $thumbnail, $active){
+			$this->Load();
+			parent::Update($title, $description, $active);
+
+			$sth = Database::Prepare("UPDATE tblPhotos SET id_photo = :id_photo, id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
+			$sth->bindValue('id_entity', $this->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_photo', ($mainphoto == null ? $this->photo->Id : $mainphoto->Id), PDO::PARAM_INT);
+			$sth->bindValue('id_thumbnail', ($thumbnail == null ? $this->thumbnail->Id : $thumbnail->Id), PDO::PARAM_INT);
 		}
 
 		public static function Create($title, $description, $mainphoto, $thumbnail){
