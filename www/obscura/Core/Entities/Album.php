@@ -50,11 +50,23 @@
 		protected function get_Vars(){
 			$this->Load();
 			return array_merge(array(
-				'cover'		=> $this->Cover->Vars,
-				'thumbnail'	=> $this->Thumbnail->Vars,
+				'cover'		=> $this->Cover->ShortVars,
+				'thumbnail'	=> $this->Thumbnail->ShortVars,
 				'photos'	=> $this->Photos->Vars
 			),
 			parent::get_Vars());
+		}
+
+		protected function set_Cover($value){
+			$this->Load();
+			$this->Update(null, null, $value, null, null);
+			$this->cover = $value;
+		}
+
+		protected function set_Thumbnail($value){
+			$this->Load();
+			$this->Update(null, null, null, $value,  null);
+			$this->thumbnail = $value;
 		}
 
 		/*** end accessors ***/
@@ -67,6 +79,30 @@
 				if($loadImmediately)
 					$this->Load();	
 			}
+		}
+
+		public function Update($title, $description, $cover, $thumbnail, $active){
+			if(get_class($cover) != 'Image')
+				throw new InvalidArgumentException();	
+			elseif(get_class($thumbnail) != 'Image')
+				throw new InvalidArgumentException();
+
+			$this->Load();
+			parent::Update($title, $description, $active);
+
+			$sth = Database::Prepare("UPDATE tblAlbums SET id_cover = :id_cover, id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
+			$sth->bindValue('id_entity', $this->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_cover', ($cover == null ? $this->cover->Id : $cover->Id), PDO::PARAM_INT);
+			$sth->bindValue('id_thumbnail', ($thumbnail == null ? $this->thumbnail->Id : $thumbnail->Id), PDO::PARAM_INT);
+
+			if($sth->execute()){
+				if($cover != null)
+					$this->cover = $cover;
+				if($thumbnail != null)
+					$this->thumbnail = $thumbnail;
+			}
+			else
+				throw new EntityException("Error updating Album Id: {$this->id}");
 		}
 
 		private function Load(){
@@ -82,9 +118,8 @@
 
 					$this->loaded = true;
 				}
-				else{
+				else
 					throw new EntityException("Invalid Album Id: {$this->id}");
-				}
 			}
 		}
 
