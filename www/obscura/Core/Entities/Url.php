@@ -46,16 +46,16 @@
 		}
 
 		public function __toString(){
-			return $this->BuildUrl(Settings::GetSetting('UrlFormat'));
+			return $this->BuildUrl(Settings::GetSettingValue('UrlFormat'));
 		}
 
 		private function BuildUrl($type){
 			$key = "UrlFormat{$this->entity->Type}" . ($type == "Actual" ? "" : $type);
-			$format = Settings::GetSetting($key);
+			$format = Settings::GetSettingValue($key);
 
 			if($format != null){
 				return rtrim(DataTools::BuildString($format, array(
-					'base' => Settings::GetSetting('UrlBase'),
+					'base' => Settings::GetSettingValue('UrlBase'),
 					'id' => $this->entity->Id,
 					'title' => str_replace(' ', '-', $this->entity->title)
 				)), '-');

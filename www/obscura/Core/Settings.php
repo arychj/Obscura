@@ -27,12 +27,11 @@
 			
 		public static function GetSetting($name){
 			if(!array_key_exists($name, self::$cache)){
-				$sth = Database::Prepare('SELECT value FROM tblSettings WHERE name = :name');
+				$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted as IsEncrypted FROM tblSettings WHERE name = :name');
 				$sth->bindValue('name', $name, PDO::PARAM_STR);
 
-				if($sth->execute()){
-					self::$cache[$name] = $sth->fetch()->value;
-				}
+				if($sth->execute())
+					self::$cache[$name] = $sth->fetch();
 				else
 					throw new DatabaseException("Unable to fetch setting with name '$name' from database");
 			}
@@ -40,8 +39,35 @@
 			return self::$cache[$name];
 		}
 
-		public static function GetSettingById($id){
+		public static function GetSettingValue($name){
+			$setting = self::GetSetting($name);
+			return $setting->Value;
+		}
 
+		public static function All(){
+			$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted AS IsEncrypted FROM tblSettings');
+			$sth->execute();
+
+			$settings = array();
+			while(($setting = $sth->fetch()) != null)
+				$settings[] = $setting;
+
+			return $settings;
+		}
+
+		public static function GetSettingById($id){
+			$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted as IsEncrypted FROM tblSettings WHERE id = :id');
+			$sth->bindValue('id', $id, PDO::PARAM_INT);
+
+			if(!$sth->execute())
+				throw new DatabaseException("Unable to fetch setting with name '$name' from database");
+
+			return $sth->fetch();
+		}
+
+		public static function GetSettingJsonById($id){
+			$setting = self::GetSettingById($id);
+			return str_replace('\/', '/', json_encode($setting));
 		}
 
 		public static function UpdateSetting($id, $name, $value, $isEncrypted){

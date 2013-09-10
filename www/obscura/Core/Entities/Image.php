@@ -79,6 +79,15 @@
 			);
 		}
 
+		protected function get_ShortVars(){
+			return array_merge(
+				array(
+					'dimensions' => $this->Dimensions->Vars
+				),
+				parent::get_ShortVars()
+			);
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($id, $loadImmediately = false, $entity = null){
@@ -92,7 +101,7 @@
 		}
 
 		public function Display(){
-			$imageDirectory = Settings::GetSetting('ImageDirectory');
+			$imageDirectory = Settings::GetSettingValue('ImageDirectory');
 
 			header("Content-type: {$this->MimeType}", true);
 			header("Cache-Control: max-age=2592000", true); //30 days
@@ -140,9 +149,9 @@
 			$extension = pathinfo($sourcepath, PATHINFO_EXTENSION);
 			$mimetype = MimeType::ParseExtension($extension);
 			$filename = "{$entity->Id}.$extension";
-			$destpath = Settings::GetSetting('ImageDirectory') . '/' . $filename;
+			$destpath = Settings::GetSettingValue('ImageDirectory') . '/' . $filename;
 
-			if(strtolower(Settings::GetSetting('ImageNewFileAction')) == 'move')
+			if(strtolower(Settings::GetSettingValue('ImageNewFileAction')) == 'move')
 				rename($sourcepath, $destpath);
 			else
 				copy($sourcepath, $destpath);
