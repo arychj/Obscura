@@ -27,6 +27,13 @@
 
 			return $template;
 		}
+
+		public static function ParseBool($s){
+			if($s == true || $s == 1 || $s == "1" || strtolower($s) == "true")
+				return true;
+			else
+				return false;
+		}
 	}
 
 ?>
