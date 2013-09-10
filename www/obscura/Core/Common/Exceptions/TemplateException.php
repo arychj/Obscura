@@ -19,7 +19,9 @@
 	 *		Created
 	 */
 
-	class TemplateException extends Exception{
+	PackageManager::Import('Core.Common.Exceptions.ObscuraException');
+
+	class TemplateException extends ObscuraException{
 		
 	}
 

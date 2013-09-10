@@ -19,7 +19,9 @@
 	 *		Created
 	 */
 
-	class AccessorException extends Exception{
+	PackageManager::Import('Core.Common.Exceptions.ObscuraException');
+
+	class AccessorException extends ObscuraException{
 
 	}
 

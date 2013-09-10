@@ -19,7 +19,9 @@
 	 *		Created
 	 */
 
-	class EntityException extends Exception{
+	PackageManager::Import('Core.Common.Exceptions.ObscuraException');
+
+	class EntityException extends ObscuraException{
 
 	}
 

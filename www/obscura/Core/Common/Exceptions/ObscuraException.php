@@ -11,18 +11,18 @@
 	 *	this stuff is worth it, you can buy me a beer in return. Erik J. Olson.
 	 *	-----------------------------------------------------------------------------
 	 *
-	 *	Obscura.Core.Common.Exceptions.DatabaseException
-	 *	Base class for exceptions thrown by Database
+	 *	Obscura.Core.Common.Exceptions.ObscuraException
+	 *	Base Exception class
 	 *
 	 *	@changelog
-	 *	2013.09.03
+	 *	2013.09.10
 	 *		Created
 	 */
 
 	PackageManager::Import('Core.Common.Exceptions.ObscuraException');
 
-	class DatabaseException extends ObscuraException{
-
+	class ObscuraException extends Exception{
+		
 	}
 
 ?>
