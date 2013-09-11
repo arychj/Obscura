@@ -134,11 +134,17 @@
 			}
 		}
 
-		public static function Create($sourcepath, $saveExif = false){
+		public static function Create($sourcepath, $saveExif = false, $mimetype = null){
 			$entity = Entity::Create(EntityTypes::Image, '', '');
 
-			$extension = pathinfo($sourcepath, PATHINFO_EXTENSION);
-			$mimetype = MimeType::ParseExtension($extension);
+			if($mimetype == null){
+				$extension = pathinfo($sourcepath, PATHINFO_EXTENSION);
+				$mimetype = MimeType::ParseExtension($extension);
+			}
+			else{
+				$extension = MimeType::LookupExtension($mimetype);
+			}
+
 			$filename = "{$entity->Id}.$extension";
 			$destpath = Settings::GetSettingValue('ImageDirectory') . '/' . $filename;
 

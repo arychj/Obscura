@@ -22,15 +22,21 @@
     PackageManager::Import('Core.Common.Database');
     PackageManager::Import('Core.Entities.Entity');
     PackageManager::Import('Core.Entities.EntityCollection');
+    PackageManager::Import('Core.Entities.ExifCollection');
     PackageManager::Import('Core.Entities.Image');
 
 	class Photo extends Entity {
 		private $loaded = false;
 
 		private $photo, $thumbnail;
-		private $resolutions;
+		private $exif, $resolutions;
 
 		/*** accessors ***/
+
+		protected function get_Exif(){
+			$this->Load();
+			return $this->exif;
+		}
 
 		protected function get_Photo(){
 			$this->Load();
@@ -142,6 +148,17 @@
 			$photo = new Photo($entity->Id, false, $entity);
 			$photo->photo = $photo;
 			$photo->thumbnail = $thumbnail;
+
+			return $photo;
+		}
+
+		public static function CreateFromFile($title, $description, $path, $mimetype = null){
+			$image = Image::Create($path, false, $mimetype);
+			$thumbnail = $image;
+
+			$photo = self::Create($title, $description, $image, $thumbnail);
+			$photo->exif = $image->Exif;
+			$photo->exit->SaveToEntity($photo);
 
 			return $photo;
 		}
