@@ -8,31 +8,44 @@
 		<div class = "row">
 			<div class = "span8">
 				<div class = "row">
-					<div class = "offset6 span2">
-						<button class = "btn btn-small btn-primary" id = "btnServiceUpdate"><i class = "icon-white icon-play"></i> Update</button>
-						<button class = "btn btn-small btn-danger pull-right" id = "btnServiceDelete"><i class = "icon-white icon-trash"></i> Delete</button>
+					<div class = "span2">
+						<button class = "btn btn-small" id = "btnManage"><i class = "icon-align-justify"></i> Manage Albums</button>
+					</div>
+					<div class = "offset4 span2">
+						<button class = "btn btn-small btn-primary" id = "btnUpdate"><i class = "icon-white icon-play"></i> Update</button>
+						<button class = "btn btn-small btn-danger pull-right" id = "btnDelete"><i class = "icon-white icon-trash"></i> Delete</button>
 					</div>
 				</div>
 				<div class = "row">
 					<div class = "span5">
-						<h5>Details</h5>
-						<div class = "control-group">
-							<input type = "text" class = "input-xlarge" id = "title" value = "{title}" placeholder = "Title"/>
+						<div class = "row">
+							<div class = "span5">
+								<h5>Details</h5>
+								<div class = "control-group">
+									<input type = "text" class = "input-xlarge" id = "title" value = "{title}" placeholder = "Title"/>
+								</div>
+								<div class = "control-group">
+									<input type = "text" class = "input-xlarge" id = "tags" value = "{tags}" placeholder = "Tags"/>
+								</div>
+								<div class = "control-group">
+									<textarea class = "span5" id = "description" rows = "5" placeholder = "Description">{description}</textarea>
+								</div>
+							</div>
 						</div>
-						<div class = "control-group">
-							<input type = "text" class = "input-xlarge" id = "tags" value = "{tags}" placeholder = "Tags"/>
-						</div>
-						<div class = "control-group">
-							<textarea class = "span5" id = "description" rows = "5" placeholder = "Description">{description}</textarea>
-						</div>
-						<div class = "control-group">
-							<label class="checkbox inline">
-								<input type = "checkbox" id = "active"/> Active
-							</label>
-						</div>
-						<div class = "control-group">
-							Hit Count: <span id = "hitcount"></span><br/>
-							Url: <a id = "url" href = ""></a>
+						<div class = "row">
+							<div class = "span1">
+								<div class = "control-group">
+									<label class="checkbox inline">
+										<input type = "checkbox" id = "active"/> Active
+									</label>
+								</div>
+							</div>
+							<div class = "span4">
+								<div class = "control-group">
+									<b>Hit Count:</b> <span id = "hitcount"></span><br/>
+									<b>Url:</b> <a id = "url" href = ""></a>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class = "span3">
@@ -55,26 +68,5 @@
 				</div>
 			</div>
 		</div>
-	</div>
-</div>
-<div id = "modalUpload" class="modal hide fade" tabindex="-1">
-	<div class="modal-header">
-		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
-		<h3>Upload</h3>
-	</div>
-	<div class="modal-body">
-		<div class = "row" id = "importSelectFile">
-			<div class = "span4">
-				<h5>Select image to upload:</h5>
-				<input type = "file" id = "filImport" />
-				<div class="progress progress-striped"  style = "display: none;">
-					<div id = "barImport" class="bar" style="width: 0%;"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class = "modal-footer">
-		<button class="btn" data-dismiss="modal" aria-hidden="true"><i class = "icon-remove"></i> Cancel</button>
-		<button class="btn btn-success" id = "btnImport"><i class = "icon-arrow-up icon-white"></i> Upload</button>
 	</div>
 </div>

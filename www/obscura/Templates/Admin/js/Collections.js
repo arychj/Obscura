@@ -11,7 +11,7 @@
  *	-----------------------------------------------------------------------------
  *
  *	Obscura/Templates/Admin/js/Collections.js
- *	Collection admin functions
+ *	Collection management functions
  *
  *	@changelog
  *	2013.09.10
@@ -20,9 +20,27 @@
 
 $(document).ready(function(){
 	$('#ddlCollections').change(LoadCollection);
+	$('#btnManage').click(ManageAlbums);
 	$('#btnUpdate').click(UpdateCollection);
 	$('#btnDelete').click(DeleteCollection);
+	$('#btnUpload').click(function(){
+		element = $(this).data('element');
+		UploadImages('Image', function(images){
+			var image = images[0];
+			$(element).css('background-image', 'url(' + image.url + ')').data('id', image.id);
+			$('#modalUpload').modal('hide');
+		});
+	});
+
+	$('#thumbnail, #cover').click(function(){
+		$('#btnUpload').data('element', this);
+	});
 });
+
+function ManageAlbums(){
+	var collectionid = $('#ddlCollections').val();
+	window.location.href = '/Admin/Albums/';
+}
 
 function LoadCollection(){
 	var collectionid = $('#ddlCollections').val();
@@ -34,8 +52,8 @@ function LoadCollection(){
 			dataType: 'json',
 			success: function (collection){
 				LoadEntity(collection);
-				$('#cover').css('background-image', 'url(' + collection.cover.url + ')');
-				$('#thumbnail').css('background-image', 'url(' + collection.thumbnail.url + ')');
+				$('#cover').css('background-image', 'url(' + collection.cover.url + ')').data('id', collection.cover.id);
+				$('#thumbnail').css('background-image', 'url(' + collection.thumbnail.url + ')').data('id', collection.thumbnail.id);
 			}
 		});
 	}
@@ -49,7 +67,10 @@ function UpdateCollection(){
 		type: 'POST',
 		data: ({
 			'title': $('#title').val(),
-			'description': $('#description').val()
+			'description': $('#description').val(),
+			'cover': $('#cover').data('id'),
+			'thumbnail': $('#thumbnail').data('id'),
+			'active': ($('#active').is(':checked') ? 1 : 0)
 		}),
 		dataType: 'json',
 		success: function(collection){
@@ -58,8 +79,7 @@ function UpdateCollection(){
 				$('#ddlCollections').val(collection.id);
 			}
 			else{
-				$('#title').val(collection.Title);
-				$('#description').val(collection.Description);
+				$('#ddlCollections option:selected').html(collection.title);
 
 			}
 		}
@@ -71,7 +91,7 @@ function DeleteCollection(){
 
 	if(collectionid.length > 0 && collectionid > 0){
 		DeleteEntity('Collection', collectionid, function(){
-			
+			$('#ddlCollections').val(-1);
 		});
 	}
 }
