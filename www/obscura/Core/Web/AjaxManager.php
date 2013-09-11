@@ -19,13 +19,16 @@
 	 *		Created
 	 */
 
+	PackageManager::Import('Core.Settings');
 	PackageManager::Import('Core.Common.AccessorClass');
+	PackageManager::Import('Core.Common.DataTools');
+	PackageManager::Import('Core.Common.Exceptions.SecurityException');
 	PackageManager::Import('Core.Entities.*');
 	PackageManager::Import('Core.Web.AjaxFormats');
 
 	class AjaxManager extends AccessorClass {
 		private $format;
-		private $isWritable;
+		private $isWritable, $isAdmin;
 		private $entity;
 		private $response;
 
@@ -33,35 +36,71 @@
 			return $this->format;
 		}
 
+		protected function get_IsWritable(){
+			return $this->isWritable;
+		}
+
+		protected function get_IsAdmin(){
+			return $this->isAdmin;
+		}
+
 		protected function get_Response(){
 			return $this->response;
 		}
 
-		public function __construct($format, $isWritable = false){
+		protected function set_IsWritable($value){
+			$this->isWritable = $value;
+		}
+
+		protected function set_IsAdmin($value){
+			$this->isAdmin = $value;
+		}
+
+		public function __construct($format, $isWritable = false, $isAdmin = false){
 			$this->format = $format;
 			$this->isWritable = $isWritable;
+			$this->isAdmin = $isAdmin;
 		}
 
 		public function Process(){
 			$this->response = null;
 
-			if(isset($_GET['entitytype']) && isset($_GET['id'])){
-				$type = $_GET['entitytype'];
+			if(isset($_GET['type']) && isset($_GET['id'])){
+				$type = $_GET['type'];
 				$id = $_GET['id'];
-				$entity = $this->GetEntity($type, $id);
-				
-				if($entity != null){
-				
-					if($this->isWritable && $this->HasUpdate())
-						$this->Update($entity);
 
-					switch($this->format){
-						case AjaxFormats::Json:
-							$this->response = $entity->ToJson();
-							break;
-						case AjaxFormats::Xml:
-							$this->reponse = $entity->ToXml();
-							break;
+				if($type == 'Setting' && $this->isAdmin){
+					if($this->HasUpdate()){
+						if($this->GetAction() == 'delete'){
+							$this->DeleteSetting($id);
+							$this->response = '{"result":"success"}';
+						}
+						else
+							$id = $this->UpdateSetting($id);
+					}
+
+					if($this->response == null)
+						$this->response = $this->GetSetting($id);
+				}
+				elseif($type == 'User'){
+
+				}
+				else{
+					$entity = $this->GetEntity($type, $id);
+					if($entity != null){
+						if($this->isAdmin || $entity->isActive){
+							if($this->HasUpdate())
+								$this->UpdateEntity($entity);
+
+							switch($this->format){
+								case AjaxFormats::Json:
+									$this->response = $entity->ToJson();
+									break;
+								case AjaxFormats::Xml:
+									$this->reponse = $entity->ToXml();
+									break;
+							}
+						}
 					}
 				}
 			}
@@ -73,8 +112,58 @@
 			return (sizeof($_POST) > 0);
 		}
 
-		private function Update($entity){
+		private function GetAction(){
+			return (isset($_POST['__action']) ? $_POST['__action'] : null);
+		}
 
+		private function GetSetting($id){
+			if($this->isAdmin)
+				return Settings::GetSettingJsonById($id);
+			else
+				throw new SecurityException('User does not have sufficient privileges to view settings');
+		}
+
+		private function UpdateEntity($entity){
+			if($this->isAdmin && $this->isWritable){
+				$title = (isset($_POST['title']) ? $_POST['title'] : null);
+				$description = (isset($_POST['description']) ? $_POST['description'] : null);
+				$cover = (isset($_POST['cover']) ? Image::Retrieve($_POST['cover']) : null);
+				$thumbnail = (isset($_POST['thumbnail']) ? Image::Retrieve($_POST['thumbnail']) : null);
+				$photo = (isset($_POST['photo']) ? Image::Retrieve($_POST['photo']) : null);
+
+				switch($entity->Type){
+					case EntityTypes::Photo: return $entity->Update($title, $description, $photo, $thumbnail, DataTools::ParseBool($_POST['active']));
+					case EntityTypes::Album: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
+					case EntityTypes::Collection: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
+				}
+
+				if(isset($_POST['tags'])){
+					//TODO: Update tags
+				}
+			}
+			else
+				throw new SecurityException('User does not have sufficient privileges to delete Entities');
+		}
+
+		private function DeleteEntity($entity){
+			if($this->isAdmin && $this->isWritable)
+				$entity->Delete();
+			else
+				throw new SecurityException('User does not have sufficient privileges to delete Entities');
+		}
+
+		private function UpdateSetting($id){
+			if($this->isAdmin && $this->isWritable)
+				return Settings::UpdateSetting($id, $_POST['name'], $_POST['value'], DataTools::ParseBool($_POST['encrypted']));
+			else
+				throw new SecurityException('User does not have sufficient privileges to update settings');
+		}
+
+		private function DeleteSetting($id){
+			if($this->isAdmin && $this->isWritable)
+				Settings::DeleteSetting($id);
+			else
+				throw new SecurityException('User does not have sufficient privileges to delete settings');
 		}
 
 		private function GetEntity($type, $id){
