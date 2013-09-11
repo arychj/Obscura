@@ -95,24 +95,31 @@
 		protected function get_Vars(){
 			$this->Load();
 			return array(
-				'id'			=> $this->Id,
-				'title'			=> $this->Title,
-				'description'	=> $this->Description,
-				'hitcount'		=> $this->HitCount,
-				'tags'			=> $this->Tags->Collection,
+				'id'			=> $this->id,
+				'title'			=> $this->title,
+				'description'	=> $this->description,
+				'hitcount'		=> $this->hitCount,
+				'tags'			=> $this->tags->Collection,
 				'url'			=> "{$this->Url}",
-				'dates'			=> $this->dates->Vars
+				'dates'			=> $this->dates->Vars,
+				'active'		=> $this->active
 			);
 		}
 
 		protected function get_ShortVars(){
 			$this->Load();
-			return array(
-				'id'			=> $this->Id,
-				'title'			=> $this->Title,
-				'description'	=> $this->Description,
+			$vars =  array(
+				'id'			=> $this->id,
 				'url'			=> "{$this->Url}"
 			);
+
+			if(strlen($this->title) > 0)
+				$vars['title'] = $this->title;
+
+			if(strlen($this->title) > 0)
+				$vars['description'] = $this->description;
+
+			return $vars;
 		}
 
 		protected function get_Tags(){
@@ -177,7 +184,15 @@
 			$sth->bindValue('description', ($description == null ? $this->description : $description), PDO::PARAM_STR);
 			$sth->bindValue('active', ($active == null ? $this->active : $active), PDO::PARAM_BOOL);
 			
-			if(!$sth->execute())
+			if($sth->execute()){
+				if($title != null)
+					$this->title = $title;
+				if($description != null)
+					$this->description = $description;
+				if($active != null)
+					$this->active = $active;
+			}
+			else
 				throw new EntityException("Error updating Entity Id: {$this->id}. ({$sth->errorCode()})");
 		}
 
