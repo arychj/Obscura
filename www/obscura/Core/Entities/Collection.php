@@ -28,7 +28,7 @@
 		private $loaded = false;
 
 		private $cover, $thumbnail;
-		private $albums;
+		private $sets;
 
 		/*** accessors ***/
 
@@ -42,16 +42,16 @@
 			return $this->thumbnail;
 		}
 
-		protected function get_Albums(){
+		protected function get_Sets(){
 			$this->Load();
-			return $this->albums;
+			return $this->sets;
 		}
 
 		protected function get_Vars(){
 			return array_merge(array(
 				'cover'		=> $this->Cover->ShortVars,
 				'thumbnail'	=> $this->Thumbnail->ShortVars,
-				'albums'	=> $this->Albums->Vars
+				'sets'	=> $this->Sets->Vars
 			),
 			parent::get_Vars());
 		}
@@ -81,9 +81,9 @@
 		}
 
 		public function Update($title, $description, $cover, $thumbnail, $active){
-			if(get_class($cover) != 'Image')
+			if(get_class($cover) != 'Image' && $cover != null)
 				throw new InvalidArgumentException();	
-			elseif(get_class($thumbnail) != 'Image')
+			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
 			$this->Load();
@@ -113,7 +113,7 @@
 				if(($details = $sth->fetch()) != null){
 					$this->cover = Image::Retrieve($details->id_cover);
 					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
-					$this->albums = EntityCollection::Retrieve($this->id, EntityTypes::Album);
+					$this->sets = EntityCollection::Retrieve($this->id, EntityTypes::Set);
 
 					$this->loaded = true;
 				}
@@ -124,9 +124,9 @@
 		}
 
 		public static function Create($title, $description, $cover, $thumbnail){
-			if(get_class($cover) != 'Image')
+			if(get_class($cover) != 'Image' && $cover != null)
 				throw new InvalidArgumentException();	
-			elseif(get_class($thumbnail) != 'Image')
+			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
 			$entity = Entity::Create(EntityTypes::Photo, $title, $description);

@@ -20,7 +20,7 @@
 	 */
 
 	require_once(dirname(__FILE__) . '/../../PackageManager.php');
-	PackageManager::Import('Core.Entities.Album');
+	PackageManager::Import('Core.Entities.Set');
 	PackageManager::Import('Core.Entities.Image');
 	PackageManager::Import('Core.Entities.Photo');
 	PackageManager::Import('Core.Web.Security');
@@ -32,7 +32,7 @@
 
 	$ids = array();
 	if(isset($_FILES[$key]) && ($count = sizeof($_FILES[$key]['name'])) > 0){
-		$album = (isset($_GET['Album']) ? Album::Retrieve($_GET['Album']) : null);
+		$set = (isset($_GET['Set']) ? Set::Retrieve($_GET['Set']) : null);
 		$photo = (isset($_GET['Photo']) ? Photo::Retrieve($_GET['Photo']) : null);
 
 		for($i = 0; $i < $count; $i++){
@@ -43,8 +43,8 @@
 			}
 			else{
 				$entity = Photo::CreateFromFile($_FILES[$key]['name'][$i], '', $_FILES[$key]['tmp_name'][$i], $_FILES[$key]['type'][$i]);
-				if($album != null)
-					$album->Photos->Add($entity);
+				if($set != null)
+					$set->Photos->Add($entity);
 			}
 
 			$ids[] = array(

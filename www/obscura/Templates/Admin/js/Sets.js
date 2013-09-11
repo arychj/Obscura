@@ -10,8 +10,8 @@
  *	this stuff is worth it, you can buy me a beer in return. Erik J. Olson.
  *	-----------------------------------------------------------------------------
  *
- *	Obscura/Templates/Admin/js/Photos.js
- *	Photo admin functions
+ *	Obscura/Templates/Admin/js/Sets.js
+ *	Set admin functions
  *
  *	@changelog
  *	2013.09.10
@@ -19,23 +19,22 @@
  */
 
 $(document).ready(function(){
-	$('#ddlCollections').change(LoadSets);
-	$('#ddlSets').change(LoadPhotos);	
-	$('#ddlPhotos').change(LoadPhoto);	
+	$('#ddlCollections').change(LoadSets);	
+	$('#ddlSets').change(LoadSet);	
 });
 
 function LoadSets(){
 	var collectionid = $('#ddlCollections').val();
 
-	if(collectionid.length > 0 && collectionid > 0){
-		$('#ddlSets').empty();
+	ClearForm();
 
+	if(collectionid.length > 0 && collectionid > 0){
 		$.ajax({
 			url: '/admin/Collection/' + collectionid + '.json',
 			type: 'GET',
 			dataType: 'json',
 			success: function(collection){
-				$('#ddlSets').append($('<option/>').attr('value', ''));
+				$('#ddlSets').append($('<option/>').attr('value', -1).html('-- New --'));
 				$(collection.sets).each(function(){
 					$('#ddlSets').append($('<option/>').attr('value', this.id).html(this.title));
 				});
@@ -44,10 +43,8 @@ function LoadSets(){
 	}
 }
 
-function LoadPhotos(){
+function LoadSet(){
 	var setid = $('#ddlSets').val();
-
-	ClearForm();
 
 	if(setid.length > 0 && setid > 0){
 		$.ajax({
@@ -55,25 +52,9 @@ function LoadPhotos(){
 			type: 'GET',
 			dataType: 'json',
 			success: function(set){
-				$(set.photos).each(function(){
-					$('#ddlPhotos').append($('<option/>').attr('value', this.id).html(this.title));
-				});
-			}
-		});
-	}
-}
-
-function LoadPhoto(){
-	var photoid = $('#ddlPhotos').val();
-
-	if(photoid.length > 0 && photoid > 0){
-		$.ajax({
-			url: '/admin/Photo/' + photoid + '.json',
-			type: 'GET',
-			dataType: 'json',
-			success: function(photo){
-				LoadEntity(photo);
-				$('#photo').attr('src', photo.photo.url);
+				LoadEntity(set);
+				$('#cover').css('background-image', 'url(' + set.cover.url + ')');
+				$('#thumbnail').css('background-image', 'url(' + set.thumbnail.url + ')');
 			}
 		});
 	}
@@ -81,5 +62,7 @@ function LoadPhoto(){
 
 function ClearForm(){
 	ClearEntity();
-	$('#ddlPhotos').empty();
+	$('#ddlSets').empty();
+	$('#cover').css('background-image', '');
+	$('#thumbnail').css('background-image', '');
 }

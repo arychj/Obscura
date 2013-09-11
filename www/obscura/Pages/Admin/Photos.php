@@ -12,7 +12,6 @@
 
 	if(isset($_GET['id']) && is_numeric($_GET['id'])){
 		$photo = Photo::Retrieve($_GET['id']);
-		$photo->Hit();
 		$vars = $photo->Vars;
 	}
 	else{
@@ -23,11 +22,15 @@
 		);
 	}
 
-	$vars['albums-optionList'] = "<option value = \"\">&nbsp;</option>\n";
+	$vars['collections-optionList'] = "<option value = \"\">&nbsp;</option>\n";
+	$collections = EntityCollection::All('Collection');
+	foreach($collections->Members as $collection)
+		$vars['collections-optionList'] .= "<option value = \"{$collection->Id}\">{$collection->Title}</option>\n";
 
-	$albums = EntityCollection::All('Album');
-	foreach($albums->Members as $album)
-		$vars['albums-optionList'] .= "<option value = \"{$album->Id}\">{$album->Title}</option>\n";
+	$vars['sets-optionList'] = "<option value = \"\">&nbsp;</option>\n";
+	$sets = EntityCollection::All('Set');
+	foreach($sets->Members as $set)
+		$vars['sets-optionList'] .= "<option value = \"{$set->Id}\">{$set->Title}</option>\n";
 
 	$template->Write('Photos', $vars);
 ?>

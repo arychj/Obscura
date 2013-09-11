@@ -20,7 +20,7 @@
 
 $(document).ready(function(){
 	$('#ddlCollections').change(LoadCollection);
-	$('#btnManage').click(ManageAlbums);
+	$('#btnManage').click(ManageSets);
 	$('#btnUpdate').click(UpdateCollection);
 	$('#btnDelete').click(DeleteCollection);
 	$('#btnUpload').click(function(){
@@ -37,9 +37,9 @@ $(document).ready(function(){
 	});
 });
 
-function ManageAlbums(){
+function ManageSets(){
 	var collectionid = $('#ddlCollections').val();
-	window.location.href = '/Admin/Albums/';
+	window.location.href = '/Admin/Sets/';
 }
 
 function LoadCollection(){

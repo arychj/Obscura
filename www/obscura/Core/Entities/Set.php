@@ -11,7 +11,7 @@
 	 *	this stuff is worth it, you can buy me a beer in return. Erik J. Olson.
 	 *	-----------------------------------------------------------------------------
 	 *
-	 *	Obscura.Core.Entities.Album
+	 *	Obscura.Core.Entities.Set
 	 *	<description>
 	 *
 	 *	@changelog
@@ -24,7 +24,7 @@
 	PackageManager::Import('Core.Entities.EntityCollection');
 	PackageManager::Import('Core.Entities.Image');
 
-	class Album extends Entity {
+	class Set extends Entity {
 		private $loaded = false;
 
 		private $cover, $thumbnail;
@@ -90,7 +90,7 @@
 			$this->Load();
 			parent::Update($title, $description, $active);
 
-			$sth = Database::Prepare("UPDATE tblAlbums SET id_cover = :id_cover, id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
+			$sth = Database::Prepare("UPDATE tblSets SET id_cover = :id_cover, id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
 			$sth->bindValue('id_entity', $this->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_cover', ($cover == null ? $this->cover->Id : $cover->Id), PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', ($thumbnail == null ? $this->thumbnail->Id : $thumbnail->Id), PDO::PARAM_INT);
@@ -102,12 +102,12 @@
 					$this->thumbnail = $thumbnail;
 			}
 			else
-				throw new EntityException("Error updating Album Id: {$this->id}");
+				throw new EntityException("Error updating Set Id: {$this->id}");
 		}
 
 		private function Load(){
 			if(!$this->loaded){
-				$sth = Database::Prepare("SELECT id_cover, id_thumbnail FROM tblAlbums where id_entity = :id");
+				$sth = Database::Prepare("SELECT id_cover, id_thumbnail FROM tblSets where id_entity = :id");
 				$sth->bindValue('id', $this->Id, PDO::PARAM_INT);
 				$sth->execute();
 
@@ -119,7 +119,7 @@
 					$this->loaded = true;
 				}
 				else
-					throw new EntityException("Invalid Album Id: {$this->id}");
+					throw new EntityException("Invalid Set Id: {$this->id}");
 			}
 		}
 
@@ -129,22 +129,22 @@
 			elseif(get_class($thumbnail) != 'Image')
 				throw new InvalidArgumentException();
 
-			$entity = Entity::Create(EntityTypes::Album, $title, $description);
+			$entity = Entity::Create(EntityTypes::Set, $title, $description);
 			
-			$sth = Database::Prepare("INSERT INTO tblAlbums (id_entity, id_cover, id_thumbnail) VALUES (:id_entity, :id_cover, :id_thumbnail)");
+			$sth = Database::Prepare("INSERT INTO tblSets (id_entity, id_cover, id_thumbnail) VALUES (:id_entity, :id_cover, :id_thumbnail)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_cover', $cover->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
 
-			$album = new Album($entity->Id, false, $entity);
-			$album->cover = $cover;
-			$album->thumbnail = $thumbnail;
+			$set = new Set($entity->Id, false, $entity);
+			$set->cover = $cover;
+			$set->thumbnail = $thumbnail;
 
-			return $album;
+			return $set;
 		}
 
 		public static function Retrieve($id, $loadImmediately = false){
-			return new Album($id, $loadImmediately);
+			return new Set($id, $loadImmediately);
 		}
 
 		public static function All(){

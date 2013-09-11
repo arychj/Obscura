@@ -9,7 +9,7 @@
 			<div class = "span8">
 				<div class = "row">
 					<div class = "span2">
-						<button class = "btn btn-small" id = "btnManage"><i class = "icon-align-justify"></i> Manage Albums</button>
+						<button class = "btn btn-small" id = "btnManage"><i class = "icon-align-justify"></i> Manage Sets</button>
 					</div>
 					<div class = "offset4 span2">
 						<button class = "btn btn-small btn-primary" id = "btnUpdate"><i class = "icon-white icon-play"></i> Update</button>

@@ -4,10 +4,7 @@
 			<select class = "span3" id = "ddlCollections">{collections-optionList}</select>
 		</div>
 		<div class = "row">
-			<select class = "span3" id = "ddlAlbums"></select>
-		</div>
-		<div class = "row">
-			<select class = "span3" id = "ddlPhotos" size = "25"></select>
+			<select class = "span3" id = "ddlSets" size = "35"></select>
 		</div>
 	</div>
 	<div class = "form-horizontal" class = "details">
@@ -15,24 +12,24 @@
 			<div class = "span8">
 				<div class = "row">
 					<div class = "span2">
-						<button class = "btn btn-small" id = "btnManage"><i class = "icon-align-justify"></i> Manage Images</button>
+						<button class = "btn btn-small" id = "btnManage"><i class = "icon-align-justify"></i> Manage Photos</button>
 					</div>
 					<div class = "offset4 span2">
-						<button class = "btn btn-small btn-primary" id = "btnServiceUpdate"><i class = "icon-white icon-play"></i> Update</button>
-						<button class = "btn btn-small btn-danger pull-right" id = "btnServiceDelete"><i class = "icon-white icon-trash"></i> Delete</button>
+						<button class = "btn btn-small btn-primary" id = "btnUpdate"><i class = "icon-white icon-play"></i> Update</button>
+						<button class = "btn btn-small btn-danger pull-right" id = "btnDelete"><i class = "icon-white icon-trash"></i> Delete</button>
 					</div>
 				</div>
 				<div class = "row">
 					<div class = "span5">
 						<h5>Details</h5>
 						<div class = "control-group">
-							<input type = "text" class = "input-xlarge" id = "txtTitle" value = "{title}" placeholder = "Title"/>
+							<input type = "text" class = "input-xlarge" id = "title" value = "{title}" placeholder = "Title"/>
 						</div>
 						<div class = "control-group">
-							<input type = "text" class = "input-xlarge" id = "txtTags" value = "{tags}" placeholder = "Tags"/>
+							<input type = "text" class = "input-xlarge" id = "tags" value ="{tags}" placeholder = "Tags"/>
 						</div>
 						<div class = "control-group">
-							<textarea class = "span5" id = "txtDescription" rows = "5" placeholder = "Description">{description}</textarea>
+							<textarea class = "span5" id = "description" rows = "5" placeholder = "Description">{description}</textarea>
 						</div>
 						<div class = "control-group">
 							<label class="checkbox inline">
@@ -46,8 +43,8 @@
 					</div>
 					<div class = "span3">
 						<div class = "control-group">
-							<h5>Exif</h5>
-							<textarea class = "input-xlarge" id = "txtExif" rows = "5">{exif}</textarea>
+							<h5>Thumbnail</h5>
+							<div id = "thumbnail" class = "thumbnail" style = "background-image: url({thumbnail-url});"></div>
 						</div>
 					</div>
 				</div>
@@ -58,9 +55,8 @@
 				</div>
 				<div class = "row">
 					<div class = "span8">
-						<div class = "control-group">
-							<img id = "photo" class = "thumbnail" src = "{photo-url}" alt = "{title}" style = "margin: auto;"/>
-						</div>
+						<h5>Cover</h5>
+						<div id = "cover" class = "thumbnail" style = "background-image: url({cover-url});"></div>
 					</div>
 				</div>
 			</div>

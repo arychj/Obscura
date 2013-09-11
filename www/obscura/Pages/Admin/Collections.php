@@ -12,7 +12,6 @@
 
 	if(isset($_GET['id']) && is_numeric($_GET['id'])){
 		$collection = Collection::Retrieve($_GET['id']);
-		$collection->Hit();
 		$vars = $collection->Vars;
 	}
 	else{

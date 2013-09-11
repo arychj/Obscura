@@ -21,7 +21,7 @@
 					<div id = "nav" class = "nav-collapse">
 						<ul class = "nav">
 							<li><a href = "/Admin/Collections">Collections</a></li>
-							<li><a href = "/Admin/Albums">Albums</a></li>
+							<li><a href = "/Admin/Sets">Sets</a></li>
 							<li><a href = "/Admin/Photos">Photos</a></li>
 							<li><a href = "/Admin/Images">Images</a></li>
 							<li><a href = "/Admin/Settings">Settings</a></li>

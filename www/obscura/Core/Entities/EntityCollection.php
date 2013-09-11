@@ -127,7 +127,7 @@
 			switch($this->memberType){
 				case EntityTypes::Image: return Image::Retrieve($id);
 				case EntityTypes::Photo: return Photo::Retrieve($id);
-				case EntityTypes::Album: return Album::Retrieve($id);
+				case EntityTypes::Set: return Set::Retrieve($id);
 				case EntityTypes::Collection: return Journal::Retrieve($id);
 				case EntityTypes::Video: return Video::Retrieve($id);
 				case EntityTypes::Journal: return Journal::Retrieve($id);

@@ -23,7 +23,7 @@
 		const Entity = "Entity";
 		const Image = "Image";
 		const Photo = "Photo";
-		const Album = "Album";
+		const Set = "Set";
 		const Collection = "Collection";
 		const Journal = "Journal";
 		const Video = "Video";

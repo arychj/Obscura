@@ -133,7 +133,7 @@
 
 				switch($entity->Type){
 					case EntityTypes::Photo: return $entity->Update($title, $description, $photo, $thumbnail, DataTools::ParseBool($_POST['active']));
-					case EntityTypes::Album: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
+					case EntityTypes::Set: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
 					case EntityTypes::Collection: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
 				}
 
@@ -170,7 +170,7 @@
 			switch($type){
 				case EntityTypes::Image: return Image::Retrieve($id);
 				case EntityTypes::Photo: return Photo::Retrieve($id);
-				case EntityTypes::Album: return Album::Retrieve($id);
+				case EntityTypes::Set: return Set::Retrieve($id);
 				case EntityTypes::Collection: return Collection::Retrieve($id);
 				case EntityTypes::Journal: return Journal::Retrieve($id);
 				case EntityTypes::Video: return Video::Retrieve($id);
