@@ -109,10 +109,35 @@
 			exit();
 		}
 
-		public function ToXml(){
+		public function GenerateThumbnail(){
+			$imageDirectory = Settings::GetSettingValue('ImageDirectory');
+			$filename = "$imageDirectory/{$this->FilePath}";
+			$tempfile = tempnam(sys_get_temp_dir(), 'obscura');
 
+			$width = 200;
+			$height = 200;
+
+			list($width_orig, $height_orig) = getimagesize($filename);
+			$ratio_orig = $width_orig/$height_orig;
+
+			if ($width / $height > $ratio_orig)
+				$width = $height * $ratio_orig;
+			else
+				$height = $width / $ratio_orig;
+
+			$image_p = imagecreatetruecolor($width, $height);
+			$image = imagecreatefromjpeg($filename);
+			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+
+			imagejpeg($image_p, $tempfile, 100);
+
+			$thumbnail = self::Create($tempfile);
+
+			@unlink($tempfile);
+
+			return $thumbnail;
 		}
-		
+
 		private function Load(){
 			if(!$this->loaded){
 				$sth = Database::Prepare("SELECT path, mimeType, extension, width, height FROM tblImages where id_entity = :id");
