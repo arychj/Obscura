@@ -31,7 +31,7 @@
 			return $this->GetExifValue('Title', '');
 		}
 
-		protected function get_Caption(){
+		protected function get_Description(){
 			return $this->GetExifValue('Description', '');
 		}
 
@@ -134,17 +134,25 @@
 
 		private static function ReadExif($file){
 			$exif = exif_read_data($file);
+			$iptc = self::ReadIptcData($file);
 			$tags = array();
 			
-			if(isset($exif['Title']))
-				$tags['Title'] = $exif['Title'];
-			if(isset($exif['Description']))
-				$tags['Description'] = $exif['Caption'];
-			if(isset($exif['COMPUTED']['ApertureFNumber']))
-				$tags['Aperture'] = substr($exif['COMPUTED']['ApertureFNumber'], 2);
-			if(isset($exif['ShutterSpeed']))
+			if(isset($iptc['Title']))
+				$tags['Title'] = $iptc['Title'];
+			if(isset($iptc['City']))
+				$tags['City'] = $iptc['City'];
+			if(isset($iptc['State / Province']))
+				$tags['State / Province'] = $iptc['State / Province'];
+			if(isset($iptc['Country']))
+				$tags['Country'] = $iptc['Country'];
+
+			if(isset($exif['ImageDescription']))
+				$tags['Description'] = $exif['ImageDescription'];
+			if(isset($exif['FNumber']))
+				$tags['Aperture'] = self::ResolveFraction($exif['FNumber'], 1);
+			if(isset($exif['ExposureTime']))
 				$tags['ShutterSpeed'] = $exif['ExposureTime'];
-			if(isset($exif['ISO']))
+			if(isset($exif['ISOSpeedRatings']))
 				$tags['ISO'] = $exif['ISOSpeedRatings'];
 			if(isset($exif['FocalLength']))
 				$tags['FocalLength'] = substr($exif['FocalLength'], 0, -2);
@@ -152,24 +160,76 @@
 				$tags['Width'] = $exif['COMPUTED']['Width'];
 			if(isset($exif['Height']))
 				$tags['Height'] = $exif['COMPUTED']['Height'];
-			if(isset($exif['TimeTaken']))
+			if(isset($exif['DateTimeOriginal']))
 				$tags['TimeTaken'] = $exif['DateTimeOriginal'];
-			if(isset($exif['CameraMake']))
+			if(isset($exif['Make']))
 				$tags['CameraMake'] = $exif['Make'];
-			if(isset($exif['CamerModel']))
+			if(isset($exif['Model']))
 				$tags['CameraModel'] = $exif['Model'];
-			if(isset($exif['Author']))
+			if(isset($exif['Artist']))
 				$tags['Author'] = $exif['Artist'];
 			if(isset($exif['Copyright']))
 				$tags['Copyright'] = $exif['Copyright'];
-
-			//TODO: Lat/long
-			if(isset($exif['Lattitude']))
-				$tags['Latitude'] = 'n/a';
-			if(isset($exif['Longitude']))
-				$tags['Longitude'] = 'n/a';
+			if(isset($exif['GPSLatitudeRef']) && isset($exif['GPSLatitude']))
+				$tags['Latitude'] = ($exif['GPSLatitudeRef'] == 'S' ? '-' : '') . self::ResolveFraction($exif['GPSLatitude'][1], 5);
+			if(isset($exif['GPSLongitudeRef']) && isset($exif['GPSLongitude']))
+				$tags['Longitude'] = ($exif['GPSLongitudeRef'] == 'W' ? '-' : '') . self::ResolveFraction($exif['GPSLongitude'][1], 5);
 
 			return $tags;
+		}
+
+		private static function ReadIptcData($image_path){
+			$size = getimagesize($image_path, $info);
+			
+			$iptc = array();
+
+			if(is_array($info)){
+				if(isset($info['APP13'])){
+					$data = iptcparse($info['APP13']);
+					foreach(array_keys($data) as $id){
+						$c = count($data[$id]);
+						for ($i = 0; $i < $c; $i++) {
+							$value = $data[$id][$i];
+
+							if($id == '2#025'){
+								if(!isset($iptc['Keywords']))
+									$iptc['Keywords'] = array();
+
+								$iptc['Keywords'][] = $value;
+							}
+							else{
+								$title = self::GetIptcTagTitle($id);
+								if($title != null)
+									$iptc[$title] = $value;
+							}
+						}
+					}
+				}
+			}
+
+			return $iptc;
+		}
+
+		private static function GetIptcTagTitle($id){
+			switch($id){
+				case '2#005': return 'Title';
+				case '2#090': return 'City';
+				case '2#095': return 'State / Province';
+				case '2#101': return 'Country';
+				case '2#120': return 'Description';
+				default: return null;
+			}
+		}
+
+		private static function ResolveFraction($fraction, $places = null){
+			$ators = explode('/', $fraction);
+
+			if(sizeof($ators) == 2){
+				$number =  $ators[0] / $ators[1];
+				return ($places == null ? $number : number_format($number, $places));
+			}
+			else
+				return $fraction;
 		}
 	}
 
