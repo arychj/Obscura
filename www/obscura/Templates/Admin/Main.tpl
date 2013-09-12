@@ -23,6 +23,7 @@
 							<li><a href = "/Admin/Collections">Collections</a></li>
 							<li><a href = "/Admin/Sets">Sets</a></li>
 							<li><a href = "/Admin/Photos">Photos</a></li>
+							<li><a href = "/Admin/Products">Products</a></li>
 							<li><a href = "/Admin/Images">Images</a></li>
 							<li><a href = "/Admin/Settings">Settings</a></li>
 							<li><a href = "/Admin/Users">Users</a></li>
@@ -52,8 +53,11 @@
 						<div class = "span4">
 							<h5>Select image to upload:</h5>
 							<form id = "imagesForm" method = "post">
-								<input type = "file" id = "images" name = "images[]" />
-								<div class = "progress progress-striped active" style = "display: none;">
+								<input type = "file" id = "images" name = "images[]"/>
+								<div id = "progressTotal" class = "progress progress-striped active" style = "display: none;">
+									<div class = "bar" role = "progressbar" style="width: 0%;"></div>
+								</div>
+								<div id = "progressFile" class = "progress progress-info progress-striped active" style = "display: none;">
 									<div class = "bar" role = "progressbar" style="width: 0%;"></div>
 								</div>
 							</form>
@@ -63,6 +67,18 @@
 				<div class = "modal-footer">
 					<button class="btn" data-dismiss="modal" aria-hidden="true"><i class = "icon-remove"></i> Cancel</button>
 					<button class="btn btn-success" id = "btnUpload"><i class = "icon-arrow-up icon-white"></i> Upload</button>
+				</div>
+			</div>
+			<div id = "modalProcessing" class="modal hide fade" tabindex="-1">
+				<div class="modal-header">
+					<h3>Processing...</h3>
+				</div>
+				<div class="modal-body">
+					<div class = "span5">
+						<div class = "progress progress-info progress-striped active">
+							<div class = "bar" role = "progressbar" style="width: 100%;"></div>
+						</div>
+					</div>
 				</div>
 			</div>
 			<hr/>

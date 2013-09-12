@@ -20,7 +20,21 @@
 
 $(document).ready(function(){
 	$('#ddlCollections').change(LoadSets);	
-	$('#ddlSets').change(LoadSet);	
+	$('#ddlSets').change(LoadSet);
+
+	$('#btnUpdate').click(UpdateSet);
+	$('#btnDelete').click(DeleteSet);
+	$('#btnUpload').click(function(){
+		element = $(this).data('element');
+		UploadImages(function(image){
+			$(element).css('background-image', 'url(' + image.url + ')').data('id', image.id);
+			$('#modalUpload').modal('hide');
+		});
+	});
+
+	$('#thumbnail, #cover').click(function(){
+		$('#btnUpload').data('element', this);
+	});
 });
 
 function LoadSets(){
@@ -29,6 +43,8 @@ function LoadSets(){
 	ClearForm();
 
 	if(collectionid.length > 0 && collectionid > 0){
+		$('#modalProcessing').modal('show');
+
 		$.ajax({
 			url: '/admin/Collection/' + collectionid + '.json',
 			type: 'GET',
@@ -38,6 +54,8 @@ function LoadSets(){
 				$(collection.sets).each(function(){
 					$('#ddlSets').append($('<option/>').attr('value', this.id).html(this.title));
 				});
+
+				$('#modalProcessing').modal('hide');
 			}
 		});
 	}
@@ -47,6 +65,8 @@ function LoadSet(){
 	var setid = $('#ddlSets').val();
 
 	if(setid.length > 0 && setid > 0){
+		$('#modalProcessing').modal('show');
+
 		$.ajax({
 			url: '/admin/Set/' + setid + '.json',
 			type: 'GET',
@@ -55,7 +75,52 @@ function LoadSet(){
 				LoadEntity(set);
 				$('#cover').css('background-image', 'url(' + set.cover.url + ')');
 				$('#thumbnail').css('background-image', 'url(' + set.thumbnail.url + ')');
+
+				$('#modalProcessing').modal('hide');
 			}
+		});
+	}
+}
+
+function UpdateSet(){
+	var setid = $('#ddlSets').val();
+
+	$('#modalProcessing').modal('show');
+
+	$.ajax({
+		url: '/admin/Set/' + setid + '.json',
+		type: 'POST',
+		data: ({
+			'title': $('#title').val(),
+			'description': $('#description').val(),
+			'cover': $('#cover').data('id'),
+			'thumbnail': $('#thumbnail').data('id'),
+			'active': ($('#active').is(':checked') ? 1 : 0)
+		}),
+		dataType: 'json',
+		success: function(set){
+			if(setid == -1){
+				$('#ddlSets').append($('<option/>').val(set.id).html(set.Title));
+				$('#ddlSets').val(set.id);
+			}
+			else{
+				$('#ddlSets option:selected').html(set.title);
+
+			}
+
+			$('#modalProcessing').modal('hide');
+		}
+	});
+}
+
+function DeleteSet(){
+	var setid = $('#ddlSets').val();
+
+	if(setid.length > 0 && setid > 0){
+		$('#modalProcessing').modal('show');
+		DeleteEntity('Set', setid, function(){
+			$('#ddlSet').val(-1);
+			$('#modalProcessing').modal('hide');
 		});
 	}
 }

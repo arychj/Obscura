@@ -95,7 +95,7 @@
 			if($this->entityid != null){
 				$memberid = (is_numeric($member) ? $member : $member->Id);
 
-				$sth = Database::Prepare("INSERT IGNORE INTO tblMemberMap WHERE id_entity = :id_entity AND id_member = :id_member");
+				$sth = Database::Prepare("INSERT IGNORE INTO tblMemberMap (id_entity, id_member) VALUES (:id_entity, :id_member)");
 				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
 				$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
 				$sth->execute();

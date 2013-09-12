@@ -82,9 +82,9 @@
 		}
 
 		public function Update($title, $description, $cover, $thumbnail, $active){
-			if(get_class($cover) != 'Image')
+			if(get_class($cover) != 'Image' && $cover != null)
 				throw new InvalidArgumentException();	
-			elseif(get_class($thumbnail) != 'Image')
+			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
 			$this->Load();

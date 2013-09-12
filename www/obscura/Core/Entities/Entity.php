@@ -258,6 +258,7 @@
 				$entity->description = $description;
 				$entity->dates = new DateTimeSet(time(), time());
 				$entity->active = true;
+				$entity->loaded = true;
 
 				return $entity;
 			}

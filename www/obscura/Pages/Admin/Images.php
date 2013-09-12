@@ -12,7 +12,6 @@
 
 	if(isset($_GET['id']) && is_numeric($_GET['id'])){
 		$image = Image::Retrieve($_GET['id']);
-		$image->Hit();
 		$vars = $image->Vars;
 	}
 	else{

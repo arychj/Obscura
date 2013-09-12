@@ -17,6 +17,11 @@
 					</div>
 				</div>
 				<div class = "row">
+					<div class = "span8">
+						<hr/>
+					</div>
+				</div>
+				<div class = "row">
 					<div class = "span5">
 						<div class = "row">
 							<div class = "span5">

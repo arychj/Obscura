@@ -27,6 +27,14 @@
 
 		/*** accessors ***/
 
+		protected function get_Title(){
+			return $this->GetExifValue('Title', '');
+		}
+
+		protected function get_Caption(){
+			return $this->GetExifValue('Description', '');
+		}
+
 		protected function get_Aperture(){
 			return $this->GetExifValue('Aperture', 0);
 		}
@@ -128,21 +136,38 @@
 			$exif = exif_read_data($file);
 			$tags = array();
 			
-			$tags['Aperture'] = substr($exif['COMPUTED']['ApertureFNumber'], 2);
-			$tags['ShutterSpeed'] = $exif['ExposureTime'];
-			$tags['ISO'] = $exif['ISOSpeedRatings'];
-			$tags['FocalLength'] = substr($exif['FocalLength'], 0, -2);
-			$tags['Width'] = $exif['COMPUTED']['Width'];
-			$tags['Height'] = $exif['COMPUTED']['Height'];
-			$tags['TimeTaken'] = $exif['DateTimeOriginal'];
-			$tags['CameraMake'] = $exif['Make'];
-			$tags['CameraModel'] = $exif['Model'];
-			$tags['Author'] = $exif['Artist'];
-			$tags['Copyright'] = $exif['Copyright'];
+			if(isset($exif['Title']))
+				$tags['Title'] = $exif['Title'];
+			if(isset($exif['Description']))
+				$tags['Description'] = $exif['Caption'];
+			if(isset($exif['COMPUTED']['ApertureFNumber']))
+				$tags['Aperture'] = substr($exif['COMPUTED']['ApertureFNumber'], 2);
+			if(isset($exif['ShutterSpeed']))
+				$tags['ShutterSpeed'] = $exif['ExposureTime'];
+			if(isset($exif['ISO']))
+				$tags['ISO'] = $exif['ISOSpeedRatings'];
+			if(isset($exif['FocalLength']))
+				$tags['FocalLength'] = substr($exif['FocalLength'], 0, -2);
+			if(isset($exif['Width']))
+				$tags['Width'] = $exif['COMPUTED']['Width'];
+			if(isset($exif['Height']))
+				$tags['Height'] = $exif['COMPUTED']['Height'];
+			if(isset($exif['TimeTaken']))
+				$tags['TimeTaken'] = $exif['DateTimeOriginal'];
+			if(isset($exif['CameraMake']))
+				$tags['CameraMake'] = $exif['Make'];
+			if(isset($exif['CamerModel']))
+				$tags['CameraModel'] = $exif['Model'];
+			if(isset($exif['Author']))
+				$tags['Author'] = $exif['Artist'];
+			if(isset($exif['Copyright']))
+				$tags['Copyright'] = $exif['Copyright'];
 
 			//TODO: Lat/long
-			$tags['Latitude'] = 'n/a';
-			$tags['Longitude'] = 'n/a';
+			if(isset($exif['Lattitude']))
+				$tags['Latitude'] = 'n/a';
+			if(isset($exif['Longitude']))
+				$tags['Longitude'] = 'n/a';
 
 			return $tags;
 		}

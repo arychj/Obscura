@@ -25,10 +25,8 @@ $(document).ready(function(){
 	$('#btnDelete').click(DeleteCollection);
 	$('#btnUpload').click(function(){
 		element = $(this).data('element');
-		UploadImages('Image', function(images){
-			var image = images[0];
+		UploadImage(function(image){
 			$(element).css('background-image', 'url(' + image.url + ')').data('id', image.id);
-			$('#modalUpload').modal('hide');
 		});
 	});
 
@@ -46,6 +44,7 @@ function LoadCollection(){
 	var collectionid = $('#ddlCollections').val();
 
 	if(collectionid.length > 0 && collectionid > 0){
+		$('#modalProcessing').modal('show');
 		$.ajax({
 			url: '/admin/Collection/' + collectionid + '.json',
 			type: 'GET',
@@ -54,6 +53,7 @@ function LoadCollection(){
 				LoadEntity(collection);
 				$('#cover').css('background-image', 'url(' + collection.cover.url + ')').data('id', collection.cover.id);
 				$('#thumbnail').css('background-image', 'url(' + collection.thumbnail.url + ')').data('id', collection.thumbnail.id);
+				$('#modalProcessing').modal('hide');
 			}
 		});
 	}
@@ -62,6 +62,7 @@ function LoadCollection(){
 function UpdateCollection(){
 	var collectionid = $('#ddlCollections').val();
 
+	$('#modalProcessing').modal('show');
 	$.ajax({
 		url: '/admin/Collection/' + collectionid + '.json',
 		type: 'POST',
@@ -82,6 +83,8 @@ function UpdateCollection(){
 				$('#ddlCollections option:selected').html(collection.title);
 
 			}
+
+			$('#modalProcessing').modal('hide');
 		}
 	});
 }
@@ -90,8 +93,10 @@ function DeleteCollection(){
 	var collectionid = $('#ddlCollections').val();
 
 	if(collectionid.length > 0 && collectionid > 0){
+		$('#modalProcessing').modal('show');
 		DeleteEntity('Collection', collectionid, function(){
 			$('#ddlCollections').val(-1);
+			$('#modalProcessing').modal('hide');
 		});
 	}
 }

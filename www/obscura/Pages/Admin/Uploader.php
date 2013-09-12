@@ -37,7 +37,7 @@
 
 		for($i = 0; $i < $count; $i++){
 			if(isset($_GET['type']) && $_GET['type'] == 'Image'){
-				$entity =Image::Create($_FILES[$key]['tmp_name'][$i], false, $_FILES[$key]['type'][$i]);
+				$entity = Image::Create($_FILES[$key]['tmp_name'][$i], false, $_FILES[$key]['type'][$i]);
 				if($photo != null)
 					$photo->Resolutions->Add($entity);
 			}
@@ -50,7 +50,7 @@
 			$ids[] = array(
 				'id'	=> $entity->Id,
 				'title'	=> $entity->Title,
-				'url'	=> $entity->Url
+				'url'	=> "{$entity->Url}"
 			);
 		}
 	}

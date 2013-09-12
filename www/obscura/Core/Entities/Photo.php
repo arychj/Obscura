@@ -144,6 +144,7 @@
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_photo', $photo->Id, PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
+			$sth->execute();
 
 			$photo = new Photo($entity->Id, false, $entity);
 			$photo->photo = $photo;
@@ -152,13 +153,13 @@
 			return $photo;
 		}
 
-		public static function CreateFromFile($title, $description, $path, $mimetype = null){
+		public static function CreateFromFile($title, $caption, $path, $mimetype = null){
 			$image = Image::Create($path, false, $mimetype);
-			$thumbnail = $image;
+			$thumbnail = $image->GenerateThumbnail();
 
-			$photo = self::Create($title, $description, $image, $thumbnail);
+			$photo = self::Create(($image->Exif->Title == '' ? $title : $image->Exif->Title), ($image->Exif->Caption == '' ? $caption : $image->Exif->Caption), $image, $thumbnail);
 			$photo->exif = $image->Exif;
-			$photo->exit->SaveToEntity($photo);
+			$photo->exif->SaveToEntity($photo);
 
 			return $photo;
 		}

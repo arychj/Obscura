@@ -20,31 +20,46 @@
 					</div>
 				</div>
 				<div class = "row">
+					<div class = "span8">
+						<hr/>
+					</div>
+				</div>
+				<div class = "row">
 					<div class = "span5">
-						<h5>Details</h5>
-						<div class = "control-group">
-							<input type = "text" class = "input-xlarge" id = "title" value = "{title}" placeholder = "Title"/>
+						<div class = "row">
+							<div class = "span5">
+								<h5>Details</h5>
+								<div class = "control-group">
+									<input type = "text" class = "input-xlarge" id = "title" value = "{title}" placeholder = "Title"/>
+								</div>
+								<div class = "control-group">
+									<input type = "text" class = "input-xlarge" id = "tags" value = "{tags}" placeholder = "Tags"/>
+								</div>
+								<div class = "control-group">
+									<textarea class = "span5" id = "description" rows = "5" placeholder = "Description">{description}</textarea>
+								</div>
+							</div>
 						</div>
-						<div class = "control-group">
-							<input type = "text" class = "input-xlarge" id = "tags" value ="{tags}" placeholder = "Tags"/>
-						</div>
-						<div class = "control-group">
-							<textarea class = "span5" id = "description" rows = "5" placeholder = "Description">{description}</textarea>
-						</div>
-						<div class = "control-group">
-							<label class="checkbox inline">
-								<input type = "checkbox" id = "active"/> Active
-							</label>
-						</div>
-						<div class = "control-group">
-							Hit Count: <span id = "hitcount"></span><br/>
-							Url: <a id = "url" href = ""></a>
+						<div class = "row">
+							<div class = "span1">
+								<div class = "control-group">
+									<label class="checkbox inline">
+										<input type = "checkbox" id = "active"/> Active
+									</label>
+								</div>
+							</div>
+							<div class = "span4">
+								<div class = "control-group">
+									<b>Hit Count:</b> <span id = "hitcount"></span><br/>
+									<b>Url:</b> <a id = "url" href = ""></a>
+								</div>
+							</div>
 						</div>
 					</div>
 					<div class = "span3">
 						<div class = "control-group">
 							<h5>Thumbnail</h5>
-							<div id = "thumbnail" class = "thumbnail" style = "background-image: url({thumbnail-url});"></div>
+							<a href = "#modalUpload" role = "button" data-toggle = "modal"><div id = "thumbnail" class = "thumbnail" style = "background-image: url({thumbnail-url});"></div></a>
 						</div>
 					</div>
 				</div>
@@ -56,7 +71,7 @@
 				<div class = "row">
 					<div class = "span8">
 						<h5>Cover</h5>
-						<div id = "cover" class = "thumbnail" style = "background-image: url({cover-url});"></div>
+						<a href = "#modalUpload" role = "button" data-toggle = "modal"><div id = "cover" class = "thumbnail" style = "background-image: url({cover-url});"></div></a>
 					</div>
 				</div>
 			</div>

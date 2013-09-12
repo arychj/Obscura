@@ -18,19 +18,55 @@
  *		Created
  */
 
-function UploadImages(type, callback){
+$(document).ready(function(){
+	$('#modalUpload').on('show', function(){
+		$(this).find('input').val('').show();
+		$(this).find('#progressTotal, #progressFile').hide();
+	});
+});
+
+function UploadImage(callback){
+	Upload('Image', null, function(images){
+		callback(images[0]);
+	});
+}
+
+function UploadImages(photo, callback){
+	Upload('Images', 'Photo=' + photo, callback);
+}
+
+function UploadPhoto(callback){
+	Upload('Photo', null, function(photos){
+		callback(photos[0]);
+	});
+}
+
+function UploadPhotos(set, callback){
+	Upload('Photos', 'Set=' + set, callback);
+}
+
+function Upload(type, parent,  callback){
 	var form = $('#imagesForm');
+	var multiple = ($(form).find('input[multiple]').length > 0);
+	var count = $(form).find('input').get(0).files.length;
 
 	$(form).find('input').hide();
-	$(form).find('.progress').show();
 	$(form).find('.bar').css('width', '0%');
 
+	$(form).find('#progressTotal').show();
+	if(multiple)
+		$(form).find('#progressFile').show();
+
 	$(form).ajaxSubmit({
-		url: 'Uploader/?type=' + type,
+		url: 'Uploader/?type=' + type + (parent == null ? '' : '&' + parent),
 		dataType: 'json',
 		uploadProgress: function(event, position, total, percent){
-			$(form).find('.bar').css('width', percent + '%');
+			$(form).find('#progressTotal .bar').css('width', percent + '%');
+			$(form).find('#progressFile .bar').css('width', ((count * percent) % 101) + '%');
 		},
-		success: callback
+		success: function(response){
+			callback(response);
+			$('#modalUpload').modal('hide');
+		}
 	});
 }
