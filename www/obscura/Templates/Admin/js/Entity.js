@@ -45,11 +45,14 @@ function DeleteEntity(type, id, callback){
 }
 
 function LoadTags(tags){
-	$('#txtTags').val(tags);
+	$('#tags').val(tags);
 }
 
 function ClearEntity(){
-	$('#txtTitle').val('');
-	$('#txtDescription').val('');
-	$('#txtTags').val('');
+	$('#title').val('');
+	$('#description').val('');
+	$('#tags').val('');
+	$('#hitcount').html('');
+	$('#url').html('').attr('href', '#');
+	$('#active').removeAttr('checked');
 }

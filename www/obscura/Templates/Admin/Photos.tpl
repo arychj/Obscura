@@ -71,7 +71,7 @@
 					<div class = "span8">
 						<div class = "control-group">
 							<h5>Exif</h5>
-							<textarea class = "input-xxlarge" id = "txtExif" rows = "5">{exif}</textarea>
+							<textarea class = "input-xxlarge" id = "exif" rows = "5">{exif}</textarea>
 						</div>
 					</div>
 				</div>
@@ -83,7 +83,8 @@
 				<div class = "row">
 					<div class = "span8">
 						<div class = "control-group">
-							<a href = "#modalUpload" role = "button" data-toggle = "modal"><img id = "photo" class = "thumbnail" src = "{photo-url}" alt = "{title}" style = "margin: auto;"/></a>
+							<a href = "#modalUpload" role = "button" data-toggle = "modal"><div id = "photo" class = "thumbnail" style = "background-image: url({photo-url});"></div></a>
+							<!--<a href = "#modalUpload" role = "button" data-toggle = "modal"><img id = "photo" class = "thumbnail" src = "{photo-url}" alt = "{title}" style = "margin: auto;"/></a>-->
 						</div>
 					</div>
 				</div>

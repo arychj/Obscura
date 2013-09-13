@@ -89,6 +89,7 @@ function LoadPhotos(){
 	var setid = $('#ddlSets').val();
 
 	ClearForm();
+	$('#ddlPhotos').empty();
 
 	if(setid.length > 0 && setid > 0){
 		$('#modalProcessing').modal('show');
@@ -117,9 +118,25 @@ function LoadPhoto(){
 			dataType: 'json',
 			success: function(photo){
 				LoadEntity(photo);
-				$('#photo').attr('src', photo.photo.url);
-				$('#thumbnail').css('background-image', 'url(' + photo.thumbnail.url + ')');
+				if(photo.photo != null){
+					$('#photo').css({
+						'width': photo.photo.dimensions.width + 'px',
+						'height': photo.photo.dimensions.height + 'px',
+						'background-image': 'url(' + photo.photo.url + ')'
+					});
+				}
+
+				if(photo.thumbnail != null)
+					$('#thumbnail').css('background-image', 'url(' + photo.thumbnail.url + ')');
+
+				if(photo.exif != null){
+					$.each(photo.exif, function(key, value){
+						$('#exif').append(key + ': ' + value + ';');
+					});
+				}
+
 				$('#modalProcessing').modal('hide');
+				$('#ddlPhotos').focus();
 			}
 		});
 	}
@@ -163,6 +180,7 @@ function DeletePhoto(){
 		$('#modalProcessing').modal('show');
 		DeleteEntity('Photo', photoid, function(){
 			$('#ddlPhotos option:selected').remove();
+			ClearForm();
 			$('#modalProcessing').modal('hide');
 		});
 	}
@@ -170,5 +188,6 @@ function DeletePhoto(){
 
 function ClearForm(){
 	ClearEntity();
-	$('#ddlPhotos').empty();
+	$('#photo').attr('src', '');
+	$('#thumbnail').css('background-image', 'url()');
 }
