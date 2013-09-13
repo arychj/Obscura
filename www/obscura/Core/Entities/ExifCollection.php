@@ -23,7 +23,7 @@
 	PackageManager::Import('Core.Common.Database');
 
 	class ExifCollection extends AccessorClass{
-		private $tags;
+		private $tags, $exif, $iptc;
 
 		/*** accessors ***/
 
@@ -87,6 +87,18 @@
 			return $this->GetExifValue('Longitude', 0);
 		}
 
+		protected function get_Exif(){
+			return $this->exif;
+		}
+
+		protected function get_Iptc(){
+			return $this->iptc;
+		}
+
+		protected function get_Vars(){
+			return $this->tags;
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($tags){
@@ -113,16 +125,21 @@
 			return new ExifCollection($tags);
 		}
 
+		public static function Retrieve($entity){
+			return self::FromEntity($entity);
+		}
+
 		public static function FromEntity($entity){
 			$entityid = (is_numeric($entity) ? $entity : $entity->Id);
 
 			$tags = array();
 
-			$sth = Database::Prepare("SELECT name FROM Type, Value FROM vwImageExifData WHERE EntityId = :id_entity");
+			$sth = Database::Prepare("SELECT Type, Value FROM vwImageExifData WHERE EntityId = :id_entity");
 			$sth->bindValue('id_entity', $entityid, PDO::PARAM_INT);
 			if($sth->execute()){
-				while(($tag = $sth->fetch()) != null)
-					$tags[$etag->Type] = $exif->Value;
+				while(($tag = $sth->fetch()) != null){
+					$tags[$tag->Type] = $tag->Value;
+				}
 			}
 
 			return new ExifCollection($tags);
@@ -133,8 +150,8 @@
 		}
 
 		private static function ReadExif($file){
-			$exif = exif_read_data($file);
-			$iptc = self::ReadIptcData($file);
+			$this->exif = exif_read_data($file);
+			$this->iptc = self::ReadIptcData($file);
 			$tags = array();
 			
 			if(isset($iptc['Title']))
@@ -156,9 +173,9 @@
 				$tags['ISO'] = $exif['ISOSpeedRatings'];
 			if(isset($exif['FocalLength']))
 				$tags['FocalLength'] = substr($exif['FocalLength'], 0, -2);
-			if(isset($exif['Width']))
+			if(isset($exif['COMPUTED']['Width']))
 				$tags['Width'] = $exif['COMPUTED']['Width'];
-			if(isset($exif['Height']))
+			if(isset($exif['COMPUTED']['Height']))
 				$tags['Height'] = $exif['COMPUTED']['Height'];
 			if(isset($exif['DateTimeOriginal']))
 				$tags['TimeTaken'] = $exif['DateTimeOriginal'];

@@ -125,8 +125,11 @@
 				$sth->execute();
 
 				if(($details = $sth->fetch()) != null){
-					$this->cover = Image::Retrieve($details->id_cover);
-					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
+					if($details->id_cover != null)
+						$this->cover = Image::Retrieve($details->id_cover);
+					if($details->id_thumbnail != null)
+						$this->thumbnail = Image::Retrieve($details->id_thumbnail);
+
 					$this->sets = EntityCollection::Retrieve($this->id, EntityTypes::Set);
 
 					$this->loaded = true;

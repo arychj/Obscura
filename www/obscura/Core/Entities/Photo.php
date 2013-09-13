@@ -57,9 +57,10 @@
 			$this->Load();
 			return array_merge(
 				array(
-					'photo'			=> $this->Photo->ShortVars,
-					'thumbnail'		=> $this->Thumbnail->ShortVars,
-					'resolutions'	=> $this->Resolutions->Vars
+					'photo'			=> ($this->Photo == null ? null : $this->Photo->ShortVars),
+					'thumbnail'		=> ($this->Thumbnail == null ? null : $this->Thumbnail->ShortVars),
+					'resolutions'	=> $this->Resolutions->Vars,
+					'exif'			=> $this->Exif->Vars
 				),
 				parent::get_Vars()
 			);
@@ -96,9 +97,13 @@
 				$sth->execute();
 
 				if(($details = $sth->fetch()) != null){
-					$this->photo = Image::Retrieve($details->id_photo);
-					$this->thumbnail = Image::Retrieve($details->id_thumbnail);
+					if($details->id_photo != null)
+						$this->photo = Image::Retrieve($details->id_photo);
+					if($details->id_thumbnail != null)
+						$this->thumbnail = Image::Retrieve($details->id_thumbnail);
+
 					$this->resolutions = EntityCollection::Retrieve($this->id, EntityTypes::Image);
+					$this->exif = ExifCollection::Retrieve($this->id);
 
 					$this->loaded = true;
 				}
@@ -170,6 +175,7 @@
 		public static function CreateFromFile($title, $description, $path, $mimetype = null){
 			$image = Image::Create($path, false, $mimetype);
 			$thumbnail = $image->GenerateThumbnail();
+			$title = preg_replace('/\\.[^.\\s]{3,4}$/', '', $title);
 
 			$photo = self::Create(($image->Exif->Title == '' ? $title : $image->Exif->Title), ($image->Exif->Description == '' ? $description : $image->Exif->Description), $image, $thumbnail);
 			$photo->exif = $image->Exif;

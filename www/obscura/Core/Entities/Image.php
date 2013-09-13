@@ -212,7 +212,7 @@
 				$image = new Image(Database::LastInsertId(), false, $entity);
 				$image->filePath = $filename;
 				$image->mimeType = $mimetype;
-				$image->dimensions = new Dimensions(0, 0);
+				$image->dimensions = new Dimensions($exif->Width, $exif->Height);
 				$image->exif = $exif;
 				$image->loaded = true;
 
