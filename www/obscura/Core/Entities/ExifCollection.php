@@ -110,7 +110,7 @@
 		}
 
 		public function SaveToEntity($entity){
-			$sth = Database::Prepare("INSERT INTO tblImageExifData (id_entity, id_type, value) VALUES (:id_entity, (SELECT id FROM tblImageExifTypes WHERE name = :name), :value)");
+			$sth = Database::Prepare("INSERT INTO tblExifData (id_entity, id_type, value) VALUES (:id_entity, (SELECT id FROM tblExifTypes WHERE name = :name), :value)");
 
 			foreach($this->tags as $name => $value){
 				$sth->execute(array(
@@ -134,7 +134,7 @@
 
 			$tags = array();
 
-			$sth = Database::Prepare("SELECT Type, Value FROM vwImageExifData WHERE EntityId = :id_entity");
+			$sth = Database::Prepare("SELECT Type, Value FROM vwExif WHERE EntityId = :id_entity");
 			$sth->bindValue('id_entity', $entityid, PDO::PARAM_INT);
 			if($sth->execute()){
 				while(($tag = $sth->fetch()) != null){
@@ -150,8 +150,8 @@
 		}
 
 		private static function ReadExif($file){
-			$this->exif = exif_read_data($file);
-			$this->iptc = self::ReadIptcData($file);
+			$exif = exif_read_data($file);
+			$iptc = self::ReadIptcData($file);
 			$tags = array();
 			
 			if(isset($iptc['Title']))
