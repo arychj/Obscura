@@ -1,0 +1,32 @@
+body{
+	margin-top: 60px;
+}
+
+.brand img{
+	vertical-align: top;
+}
+
+.thumbnail{
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+
+#cover{
+	width: 825px;
+	height: 200px;
+	border: 1px solid #ddd;
+}
+
+#thumbnail{
+	margin: auto;
+	width: 200px;
+	height: 200px;
+	border: 1px solid #ddd;
+}
+
+.modal{
+	outline: 0;
+}
+
+/*** Collections ***/
+

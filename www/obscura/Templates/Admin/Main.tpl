@@ -70,16 +70,6 @@
 				</div>
 			</div>
 			<div id = "modalProcessing" class="modal hide fade" tabindex="-1">
-				<div class="modal-header">
-					<h3>Processing...</h3>
-				</div>
-				<div class="modal-body">
-					<div class = "span5">
-						<div class = "progress progress-info progress-striped active">
-							<div class = "bar" role = "progressbar" style="width: 100%;"></div>
-						</div>
-					</div>
-				</div>
 			</div>
 			<hr/>
 			<footer>

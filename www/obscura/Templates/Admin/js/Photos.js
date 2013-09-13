@@ -119,7 +119,7 @@ function LoadPhoto(){
 			dataType: 'json',
 			success: function(photo){
 				LoadEntity(photo);
-				if(photo.photo != null){
+				if(false && photo.photo != null){
 					$('#photo').css({
 						'width': photo.photo.dimensions.width + 'px',
 						'height': photo.photo.dimensions.height + 'px',
@@ -137,7 +137,9 @@ function LoadPhoto(){
 				}
 
 				$('#modalProcessing').modal('hide');
-				$('#ddlPhotos').focus();
+				$('#modalProcessing').one('hidden', function(){
+					$('#ddlPhotos').focus();
+				});
 			}
 		});
 	}

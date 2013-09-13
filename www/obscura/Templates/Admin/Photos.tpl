@@ -83,8 +83,7 @@
 				<div class = "row">
 					<div class = "span8">
 						<div class = "control-group">
-							<a href = "#modalUpload" role = "button" data-toggle = "modal"><div id = "photo" class = "thumbnail" style = "background-image: url({photo-url});"></div></a>
-							<!--<a href = "#modalUpload" role = "button" data-toggle = "modal"><img id = "photo" class = "thumbnail" src = "{photo-url}" alt = "{title}" style = "margin: auto;"/></a>-->
+							<!--<a href = "#modalUpload" role = "button" data-toggle = "modal"><div id = "photo" class = "thumbnail" style = "background-image: url({photo-url});"></div></a>-->
 						</div>
 					</div>
 				</div>
