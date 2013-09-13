@@ -22,6 +22,7 @@ $(document).ready(function(){
 	$('#ddlCollections').change(LoadSets);
 	$('#ddlSets').change(LoadPhotos);	
 	$('#ddlPhotos').change(LoadPhoto);
+	$('#btnUpdate').click(UpdatePhoto);
 	$('#btnDelete').click(DeletePhoto);
 	$('#btnUpload').click(function(){
 		element = $(this).data('element');
