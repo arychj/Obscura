@@ -26,10 +26,13 @@ $(document).ready(function(){
 		element = $(this).data('element');
 		if($(element).attr('id') == 'btnBatchUpload'){
 			UploadPhotos($('#ddlSets').val(), function(photos){
+				var lastid = 0;
 				$(photos).each(function(){
 					$('#ddlPhotos').append($('<option/>').attr('value', this.id).html(this.title));
+					lastid = this.id;
 				});
 
+				$('#ddlPhotos').val(lastid).change();
 				$('#modalUpload').modal('hide');
 			});
 		}
