@@ -34,12 +34,12 @@
 		protected $id;
 
 		private $typeid, $type;
-		private $title, $description;
 		private $dates;
 		private $active;
 		private $hitcount;
 		private $url;
 		private $tags;
+		protected $title, $description;
 
 		/*** accessors ***/
 

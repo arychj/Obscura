@@ -88,6 +88,14 @@
 			);
 		}
 
+		protected function set_Title($value){
+
+		}
+
+		protected function set_Description($value){
+
+		}
+
 		/*** end accessors ***/
 
 		protected function __construct($id, $loadImmediately = false, $entity = null){
@@ -140,11 +148,12 @@
 
 		private function Load(){
 			if(!$this->loaded){
-				$sth = Database::Prepare("SELECT path, mimeType, extension, width, height FROM tblImages where id_entity = :id");
+				$sth = Database::Prepare("SELECT title, path, mimeType, extension, width, height FROM vwImages WHERE id_entity = :id");
 				$sth->bindValue('id', $this->Id, PDO::PARAM_INT);
 				$sth->execute();
 
 				if(($image = $sth->fetch()) != null){
+					$this->title = $image->title;
 					$this->filePath = $image->path;
 					$this->mimeType = $image->mimeType;
 					$this->extension = $image->extension;
@@ -191,10 +200,11 @@
 			
 			if($sth->execute()){
 				$image = new Image(Database::LastInsertId(), false, $entity);
-				$image->filePath = $sourcepath;
-				$image->mimeType = "";
+				$image->filePath = $filename;
+				$image->mimeType = $mimetype;
 				$image->dimensions = new Dimensions(0, 0);
 				$image->exif = $exif;
+				$image->loaded = true;
 
 				if($saveExif)
 					$exif->SaveToEntity($image);
