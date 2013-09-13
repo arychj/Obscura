@@ -139,7 +139,7 @@
 
 			imagejpeg($image_p, $tempfile, 100);
 
-			$thumbnail = self::Create($tempfile);
+			$thumbnail = self::Create($tempfile, false, $this->mimeType);
 
 			@unlink($tempfile);
 
