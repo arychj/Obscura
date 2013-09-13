@@ -132,6 +132,20 @@
 				throw new EntityException("Error updating Photo Id: {$this->id}");
 		}
 
+		public function Delete(){
+			$this->Load();
+
+			if($this->photo != null)
+				$this->photo->Delete();
+			if($this->thumbnail != null)
+				$this->thumbnail->Delete();
+
+			foreach($this->resolutions->Members as $member)
+				$member->Delete();
+
+			parent::Delete();
+		}
+
 		public static function Create($title, $description, $photo, $thumbnail){
 			if(get_class($photo) != 'Image')
 				throw new InvalidArgumentException();	
@@ -153,11 +167,11 @@
 			return $photo;
 		}
 
-		public static function CreateFromFile($title, $caption, $path, $mimetype = null){
+		public static function CreateFromFile($title, $description, $path, $mimetype = null){
 			$image = Image::Create($path, false, $mimetype);
 			$thumbnail = $image->GenerateThumbnail();
 
-			$photo = self::Create(($image->Exif->Title == '' ? $title : $image->Exif->Title), ($image->Exif->Caption == '' ? $caption : $image->Exif->Caption), $image, $thumbnail);
+			$photo = self::Create(($image->Exif->Title == '' ? $title : $image->Exif->Title), ($image->Exif->Description == '' ? $description : $image->Exif->Description), $image, $thumbnail);
 			$photo->exif = $image->Exif;
 			$photo->exif->SaveToEntity($photo);
 

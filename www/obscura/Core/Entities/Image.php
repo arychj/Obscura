@@ -146,6 +146,16 @@
 			return $thumbnail;
 		}
 
+		public function Delete(){
+			$this->Load();
+			$imageDirectory = Settings::GetSettingValue('ImageDirectory');
+			$filename = "$imageDirectory/{$this->FilePath}";
+
+			@unlink($filename);
+
+			parent::Delete();
+		}
+
 		private function Load(){
 			if(!$this->loaded){
 				$sth = Database::Prepare("SELECT title, path, mimeType, extension, width, height FROM vwImages WHERE id_entity = :id");

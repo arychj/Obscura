@@ -200,11 +200,11 @@
 			$this->Load();
 
 			$sth = Database::Prepare("DELETE FROM tblEntities WHERE id = :id");
-			$sth->bindParam('id', $this->id, $this->id, PDO::PARAM_INT);
+			$sth->bindParam('id', $this->id, PDO::PARAM_INT);
 
 			if(!$sth->execute())
-				throw new EntityException("Error deleting Entity Id: {$this->id}");
-			else if($sth->rowCount() == 0)
+				throw new EntityException("Error deleting Entity Id: {$this->id} " . print_r($sth->errorInfo(), true));
+			elseif($sth->rowCount() == 0)
 				throw new EntityException("Error deleting Entity Id: {$this->id}. Entity does not exist");
 		}
 

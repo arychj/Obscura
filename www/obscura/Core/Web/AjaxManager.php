@@ -89,16 +89,24 @@
 					$entity = $this->GetEntity($type, $id);
 					if($entity != null){
 						if($this->isAdmin || $entity->isActive){
-							if($this->HasUpdate())
-								$this->UpdateEntity($entity);
+							if($this->HasUpdate()){
+								if($this->GetAction() == 'delete'){
+									$this->DeleteEntity($entity);
+									$this->response = '{"result":"success"}';
+								}
+								else
+									$this->UpdateEntity($entity);
+							}
 
-							switch($this->format){
-								case AjaxFormats::Json:
-									$this->response = $entity->ToJson();
-									break;
-								case AjaxFormats::Xml:
-									$this->reponse = $entity->ToXml();
-									break;
+							if($this->response == null){
+								switch($this->format){
+									case AjaxFormats::Json:
+										$this->response = $entity->ToJson();
+										break;
+									case AjaxFormats::Xml:
+										$this->reponse = $entity->ToXml();
+										break;
+								}
 							}
 						}
 					}
@@ -126,15 +134,16 @@
 		private function UpdateEntity($entity){
 			if($this->isAdmin && $this->isWritable){
 				$title = (isset($_POST['title']) ? $_POST['title'] : null);
+				$active = (isset($_POST['active']) ? DataTools::ParseBool($_POST['active']) : null);
 				$description = (isset($_POST['description']) ? $_POST['description'] : null);
 				$cover = (isset($_POST['cover']) ? Image::Retrieve($_POST['cover']) : null);
 				$thumbnail = (isset($_POST['thumbnail']) ? Image::Retrieve($_POST['thumbnail']) : null);
 				$photo = (isset($_POST['photo']) ? Image::Retrieve($_POST['photo']) : null);
 
 				switch($entity->Type){
-					case EntityTypes::Photo: return $entity->Update($title, $description, $photo, $thumbnail, DataTools::ParseBool($_POST['active']));
-					case EntityTypes::Set: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
-					case EntityTypes::Collection: return $entity->Update($title, $description, $cover, $thumbnail, DataTools::ParseBool($_POST['active']));
+					case EntityTypes::Photo: return $entity->Update($title, $description, $photo, $thumbnail, $active);
+					case EntityTypes::Set: return $entity->Update($title, $description, $cover, $thumbnail, $active);
+					case EntityTypes::Collection: return $entity->Update($title, $description, $cover, $thumbnail, $active);
 				}
 
 				if(isset($_POST['tags'])){

@@ -105,6 +105,20 @@
 				throw new EntityException("Error updating Set Id: {$this->id}");
 		}
 
+		public function Delete(){
+			$this->Load();
+
+			if($this->cover != null)
+				$this->cover->Delete();
+			if($this->thumbnail != null)
+				$this->thumbnail->Delete();
+
+			foreach($this->photos->Members as $member)
+				$member->Delete();
+
+			parent::Delete();
+		}
+
 		private function Load(){
 			if(!$this->loaded){
 				$sth = Database::Prepare("SELECT id_cover, id_thumbnail FROM tblSets where id_entity = :id");
