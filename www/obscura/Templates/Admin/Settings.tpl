@@ -27,6 +27,13 @@
 								<textarea class = "input-xlarge" id = "value" placeholder = "Value"></textarea>
 							</div>
 						</div>
+						<div class = "control-group">
+							<label class="control-label" for="value">Value</label>
+							<div class="controls">
+								<textarea class = "input-xlarge" id = "description" placeholder = "Description"></textarea>
+							</div>
+						</div>
+						</div>
 							<label class="control-label" for="chkEncryptServiceSetting">&nbsp;</label>
 							<div class="controls">
 								<label class="checkbox inline">

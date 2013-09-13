@@ -35,6 +35,7 @@ function LoadSetting(){
 			success: function(setting){
 				$('#name').val(setting.Name);
 				$('#value').val(setting.Value);
+				$('#description').val(setting.Description);
 
 				if(setting.IsEncrypted == '1')
 					$('#encrypted').attr('checked', 'checked');
@@ -59,6 +60,7 @@ function UpdateSetting(){
 		data: ({
 			'name': $('#name').val(),
 			'value': $('#value').val(),
+			'description': $('#description').val(),
 			'encrypted': ($('#encrypted').is(':checked') ? 1 : 0)
 		}),
 		dataType: 'json',

@@ -25,9 +25,13 @@
 	class Settings {
 		private static $cache = array();
 			
-		public static function GetSetting($name){
+		public static function GetSetting($name, $getDescription = false){
 			if(!array_key_exists($name, self::$cache)){
-				$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted as IsEncrypted FROM tblSettings WHERE name = :name');
+				if($getDescription)
+					$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, description AS Description, tfEncrypted as IsEncrypted FROM tblSettings WHERE name = :name');
+				else
+					$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted as IsEncrypted FROM tblSettings WHERE name = :name');
+
 				$sth->bindValue('name', $name, PDO::PARAM_STR);
 
 				if($sth->execute())
@@ -55,8 +59,12 @@
 			return $settings;
 		}
 
-		public static function GetSettingById($id){
-			$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted as IsEncrypted FROM tblSettings WHERE id = :id');
+		public static function GetSettingById($id, $getDescription = false){
+			if($getDescription)
+				$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, description AS Description, tfEncrypted as IsEncrypted FROM tblSettings WHERE id = :id');
+			else
+				$sth = Database::Prepare('SELECT id AS Id, name AS Name, value AS Value, tfEncrypted as IsEncrypted FROM tblSettings WHERE id = :id');
+
 			$sth->bindValue('id', $id, PDO::PARAM_INT);
 
 			if(!$sth->execute())
@@ -65,8 +73,8 @@
 			return $sth->fetch();
 		}
 
-		public static function GetSettingJsonById($id){
-			$setting = self::GetSettingById($id);
+		public static function GetSettingJsonById($id, $getDescription = false){
+			$setting = self::GetSettingById($id, $getDescription);
 			return str_replace('\/', '/', json_encode($setting));
 		}
 

@@ -126,7 +126,7 @@
 
 		private function GetSetting($id){
 			if($this->isAdmin)
-				return Settings::GetSettingJsonById($id);
+				return Settings::GetSettingJsonById($id, true);
 			else
 				throw new SecurityException('User does not have sufficient privileges to view settings');
 		}
