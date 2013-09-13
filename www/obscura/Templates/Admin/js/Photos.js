@@ -21,7 +21,8 @@
 $(document).ready(function(){
 	$('#ddlCollections').change(LoadSets);
 	$('#ddlSets').change(LoadPhotos);	
-	$('#ddlPhotos').change(LoadPhoto);	
+	$('#ddlPhotos').change(LoadPhoto);
+	$('#btnDelete').click(DeletePhoto);
 	$('#btnUpload').click(function(){
 		element = $(this).data('element');
 		if($(element).attr('id') == 'btnBatchUpload'){
@@ -161,7 +162,7 @@ function DeletePhoto(){
 	if(photoid.length > 0 && photoid > 0){
 		$('#modalProcessing').modal('show');
 		DeleteEntity('Photo', photoid, function(){
-			$('#ddlPhoto').val(-1);
+			$('#ddlPhotos option:selected').remove();
 			$('#modalProcessing').modal('hide');
 		});
 	}

@@ -119,7 +119,7 @@ function DeleteSet(){
 	if(setid.length > 0 && setid > 0){
 		$('#modalProcessing').modal('show');
 		DeleteEntity('Set', setid, function(){
-			$('#ddlSet').val(-1);
+			$('#ddlSets option:selected').remove();
 			$('#modalProcessing').modal('hide');
 		});
 	}

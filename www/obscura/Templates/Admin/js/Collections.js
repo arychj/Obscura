@@ -95,7 +95,7 @@ function DeleteCollection(){
 	if(collectionid.length > 0 && collectionid > 0){
 		$('#modalProcessing').modal('show');
 		DeleteEntity('Collection', collectionid, function(){
-			$('#ddlCollections').val(-1);
+			$('#ddlCollections option:selected').remove();
 			$('#modalProcessing').modal('hide');
 		});
 	}

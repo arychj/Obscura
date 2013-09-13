@@ -19,8 +19,8 @@
 						<button class = "btn btn-small" id = "btnManage"><i class = "icon-align-justify"></i> Manage Images</button>
 					</div>
 					<div class = "offset3 span2">
-						<button class = "btn btn-small btn-primary" id = "btnServiceUpdate"><i class = "icon-white icon-play"></i> Update</button>
-						<button class = "btn btn-small btn-danger pull-right" id = "btnServiceDelete"><i class = "icon-white icon-trash"></i> Delete</button>
+						<button class = "btn btn-small btn-primary" id = "btnUpdate"><i class = "icon-white icon-play"></i> Update</button>
+						<button class = "btn btn-small btn-danger pull-right" id = "btnDelete"><i class = "icon-white icon-trash"></i> Delete</button>
 					</div>
 				</div>
 				<div class = "row">
