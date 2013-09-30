@@ -49,8 +49,8 @@
 
 		protected function get_Vars(){
 			return array_merge(array(
-				'cover'		=> $this->Cover->ShortVars,
-				'thumbnail'	=> $this->Thumbnail->ShortVars,
+				'cover'		=> ($this->Cover == null ? null : $this->Cover->ShortVars),
+				'thumbnail'	=> ($this->Thumbnail == null ? null : $this->Thumbnail->ShortVars),
 				'sets'	=> $this->Sets->Vars
 			),
 			parent::get_Vars());
@@ -146,12 +146,13 @@
 			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
-			$entity = Entity::Create(EntityTypes::Photo, $title, $description);
+			$entity = Entity::Create(EntityTypes::Collection, $title, $description);
 			
 			$sth = Database::Prepare("INSERT INTO tblCollections (id_entity, id_cover, id_thumbnail) VALUES (:id_entity, :id_cover, :id_thumbnail)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_cover', $cover->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_cover', ($cover == null ? null : $cover->Id), PDO::PARAM_INT);
+			$sth->bindValue('id_thumbnail', ($thumbnail == null ? null : $thumbnail->Id), PDO::PARAM_INT);
+			$sth->execute();
 
 			$collection = new Collection($entity->Id, false, $entity);
 			$collection->cover = $cover;

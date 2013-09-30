@@ -50,8 +50,8 @@
 		protected function get_Vars(){
 			$this->Load();
 			return array_merge(array(
-				'cover'		=> $this->Cover->ShortVars,
-				'thumbnail'	=> $this->Thumbnail->ShortVars,
+				'cover'		=> ($this->Cover == null ? null : $this->Cover->ShortVars),
+				'thumbnail'	=> ($this->Thumbnail == null ? null : $this->Thumbnail->ShortVars),
 				'photos'	=> $this->Photos->Vars
 			),
 			parent::get_Vars());
@@ -141,17 +141,18 @@
 		}
 
 		public static function Create($title, $description, $cover, $thumbnail){
-			if(get_class($cover) != 'Image')
-				throw new InvalidArgumentException();	
-			elseif(get_class($thumbnail) != 'Image')
+			if(get_class($cover) != 'Image' && $cover != null)
+				throw new InvalidArgumentException();
+			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
 			$entity = Entity::Create(EntityTypes::Set, $title, $description);
 			
 			$sth = Database::Prepare("INSERT INTO tblSets (id_entity, id_cover, id_thumbnail) VALUES (:id_entity, :id_cover, :id_thumbnail)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_cover', $cover->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_cover', ($cover == null ? null : $cover->Id), PDO::PARAM_INT);
+			$sth->bindValue('id_thumbnail', ($thumbnail == null ? null : $thumbnail->Id), PDO::PARAM_INT);
+			$sth->execute();
 
 			$set = new Set($entity->Id, false, $entity);
 			$set->cover = $cover;
