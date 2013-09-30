@@ -66,15 +66,9 @@
 			);
 		}
 
-		protected function set_Photo($value){
-			$this->Load();
-			$this->Update(null, null, $value, null, null);
-			$this->photo = $value;
-		}
-
 		protected function set_Thumbnail($value){
 			$this->Load();
-			$this->Update(null, null, null, $value, null);
+			$this->Update(null, null, $value, null);
 			$this->thumbnail = $value;
 		}
 
@@ -113,23 +107,18 @@
 			}
 		}
 
-		public function Update($title, $description, $photo, $thumbnail, $active){
-			if(get_class($photo) != 'Image' && $photo != null)
-				throw new InvalidArgumentException();
-			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
+		public function Update($title, $description, $thumbnail, $active){
+			if(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
 			$this->Load();
 			parent::Update($title, $description, $active);
 
-			$sth = Database::Prepare("UPDATE tblPhotos SET id_photo = :id_photo, id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
+			$sth = Database::Prepare("UPDATE tblPhotos SET id_thumbnail = :id_thumbnail WHERE id_entity = :id_entity");
 			$sth->bindValue('id_entity', $this->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_photo', ($photo == null ? $this->photo->Id : $photo->Id), PDO::PARAM_INT);
 			$sth->bindValue('id_thumbnail', ($thumbnail == null ? $this->thumbnail->Id : $thumbnail->Id), PDO::PARAM_INT);
 
 			if($sth->execute()){
-				if($photo != null)
-					$this->photo = $photo;
 				if($thumbnail != null)
 					$this->thumbnail = $thumbnail;
 			}
@@ -181,7 +170,7 @@
 			$photo->exif = $original->Exif;
 			$photo->exif->SaveToEntity($photo);
 
-			$sth = Database::Prepare('SELECT name, longEdge, shortEdge FROM tblImageTypes WHERE tfGenerate = 1');
+			$sth = Database::Prepare('SELECT name, longEdge, shortEdge FROM tblImageSizes WHERE tfGenerate = 1');
 			$sth->execute();
 			while(($size = $sth->fetch()) != null){
 				$image = $original->Generate($size->longEdge, $size->shortEdge, $size->name, $photo->Title);
@@ -190,7 +179,6 @@
 				if($size->name == 'Thumbnail')
 					$photo->Thumbnail = $image;
 			}
-
 
 			return $photo;
 		}
