@@ -86,28 +86,36 @@
 
 				}
 				else{
-					$entity = $this->GetEntity($type, $id);
-					if($entity != null){
-						if($this->isAdmin || $entity->isActive){
-							if($this->HasUpdate()){
-								if($this->GetAction() == 'delete'){
-									$this->DeleteEntity($entity);
-									$this->response = '{"result":"success"}';
-								}
-								else
-									$this->UpdateEntity($entity);
-							}
+					$entity = null;
 
-							if($this->response == null){
-								switch($this->format){
-									case AjaxFormats::Json:
-										$this->response = $entity->ToJson();
-										break;
-									case AjaxFormats::Xml:
-										$this->reponse = $entity->ToXml();
-										break;
+					if($id == -1){
+						$entity = $this->CreateEntity($type);
+					}
+					else{
+						$entity = $this->GetEntity($type, $id);
+						if($entity != null){
+							if($this->isAdmin || $entity->isActive){
+								if($this->HasUpdate()){
+									if($this->GetAction() == 'delete'){
+										$this->DeleteEntity($entity);
+										$this->response = '{"result":"success"}';
+									}
+									else
+										$this->UpdateEntity($entity);
 								}
+
 							}
+						}
+					}
+
+					if($entity != null && $this->response == null){
+						switch($this->format){
+							case AjaxFormats::Json:
+								$this->response = $entity->ToJson();
+								break;
+							case AjaxFormats::Xml:
+								$this->reponse = $entity->ToXml();
+								break;
 						}
 					}
 				}
@@ -131,6 +139,33 @@
 				throw new SecurityException('User does not have sufficient privileges to view settings');
 		}
 
+		private function CreateEntity($type){
+			if($this->isAdmin && $this->isWritable){
+				$title = (isset($_POST['title']) ? $_POST['title'] : null);
+				$description = (isset($_POST['description']) ? $_POST['description'] : null);
+				$cover = (isset($_POST['cover']) ? Image::Retrieve($_POST['cover']) : null);
+				$thumbnail = (isset($_POST['thumbnail']) ? Image::Retrieve($_POST['thumbnail']) : null);
+				$photo = (isset($_POST['photo']) ? Image::Retrieve($_POST['photo']) : null);
+
+				switch($type){
+					case EntityTypes::Set:
+						$set = Set::Create($title, $description, $cover, $thumbnail);
+						if(isset($_POST['parent'])){
+							$parent = Collection::Retrieve($_POST['parent']);
+							$parent->Sets->Add($set);
+						}
+						return $set;
+					case EntityTypes::Collection: return Collection::Create($title, $description, $cover, $thumbnail);
+				}
+
+				if(isset($_POST['tags'])){
+					//TODO: Update tags
+				}
+			}
+			else
+				throw new SecurityException('User does not have sufficient privileges to Cretae Entities');
+		}
+
 		private function UpdateEntity($entity){
 			if($this->isAdmin && $this->isWritable){
 				$title = (isset($_POST['title']) ? $_POST['title'] : null);
@@ -151,7 +186,7 @@
 				}
 			}
 			else
-				throw new SecurityException('User does not have sufficient privileges to delete Entities');
+				throw new SecurityException('User does not have sufficient privileges to update Entities');
 		}
 
 		private function DeleteEntity($entity){
