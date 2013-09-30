@@ -21,6 +21,7 @@
 
 	PackageManager::Import('Core.Settings');
 	PackageManager::Import('Core.Common.Database');
+	PackageManager::Import('Core.Common.Exceptions.ImageException');
 	PackageManager::Import('Core.Common.MimeType');
 	PackageManager::Import('Core.Entities.Entity');
 	PackageManager::Import('Core.Entities.Dimensions');
@@ -75,7 +76,7 @@
 				array(
 					'dimensions' => $this->Dimensions->Vars
 				),
-				parent::get_Vars()
+				parent::get_ShortVars()
 			);
 		}
 
@@ -117,33 +118,94 @@
 			exit();
 		}
 
-		public function GenerateThumbnail(){
+		public function Generate($edgeLong, $edgeShort, $type = null, $title = null){
+			$destW = null;
+			$destH = null;
+			$srcX = null;
+			$srcY = null;
+			$srcW = null;
+			$srcH = null;
+
 			$imageDirectory = Settings::GetSettingValue('ImageDirectory');
 			$filename = "$imageDirectory/{$this->FilePath}";
 			$tempfile = tempnam(sys_get_temp_dir(), 'obscura');
 
-			$width = 200;
-			$height = 200;
+			//calculate size
+			list($orgW, $orgH) = getimagesize($filename);
+			$ratio = $orgW / $orgH;
 
-			list($width_orig, $height_orig) = getimagesize($filename);
-			$ratio_orig = $width_orig/$height_orig;
+			if($edgeShort == null && $edgeLong != null){ //resize on long edge
+				$srcX = 0;
+				$srcY = 0;
+				$srcW = $orgW;
+				$srcH = $orgH;
 
-			if ($width / $height > $ratio_orig)
-				$width = $height * $ratio_orig;
-			else
-				$height = $width / $ratio_orig;
+				if($ratio < 1){
+					$destH = $edgeLong;
+					$destW = $destH * $ratio;
+				}
+				else{
+					$destW = $edgeLong;
+					$destH = $destW / $ratio;
+				}
+			}
+			elseif($edgeShort != null && $edgeLong == null){ //resize on short edge
+				$srcX = 0;
+				$srcY = 0;
+				$srcW = $orgW;
+				$srcH = $orgH;
 
-			$image_p = imagecreatetruecolor($width, $height);
-			$image = imagecreatefromjpeg($filename);
-			imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+				if($ratio < 1){
+					$destW = $edgeShort;
+					$destH = $destW / $ratio;
+				}
+				else{
+					$destH = $edgeShort;
+					$destW = $destH * $ratio;
+				}
+			}
+			elseif($edgeShort != null && $edgeLong != null){ //crop to size
+				if($ratio < 1){
+					$cropRatio = ($orgW / $edgeShort);
+					$srcY = $orgH / $cropRatio / 2;
+					$srcX = 0;
+					$srcH = $edgeLong * $cropRatio;
+					$srcW = $edgeShort * $cropRatio;
+					$destH = $edgeLong;
+					$destW = $edgeShort;
+				}
+				else{
+					$cropRatio = ($orgH / $edgeShort);
+					$srcX = $orgW / $cropRatio / 2;
+					$srcY = 0;
+					$srcW = $edgeLong * $cropRatio;
+					$srcH = $edgeShort * $cropRatio;
+					$destW = $edgeLong;
+					$destH = $edgeShort;
+				}
+			}
 
-			imagejpeg($image_p, $tempfile, 100);
+			if($destW !== null && $destH !== null && $srcX !== null && $srcY !== null && $srcW !== null && $srcH != null){
+				$image_p = imagecreatetruecolor($destW, $destH);
+				$image = imagecreatefromjpeg($filename);
+				imagecopyresampled($image_p, $image, 0, 0, $srcX, $srcY, $destW, $destH, $srcW, $srcH);
+				imagejpeg($image_p, $tempfile, 100);
 
-			$thumbnail = self::Create($tempfile, false, $this->mimeType);
+				$image = self::Create($tempfile, false, $this->mimeType, $type);
+				$image->title = $title;
 
-			@unlink($tempfile);
+				@unlink($tempfile);
 
-			return $thumbnail;
+				return $image;
+			}
+			else{
+				@unlink($tempfile);
+				throw new ImageException("Unable to generate Image. Invalid dimensions specified.");
+			}
+		}
+
+		public function GenerateThumbnail(){
+			return $this->Generate(200, 200);
 		}
 
 		public function Delete(){
@@ -178,7 +240,7 @@
 			}
 		}
 
-		public static function Create($sourcepath, $saveExif = false, $mimetype = null){
+		public static function Create($sourcepath, $saveExif = false, $mimetype = null, $type = null){
 			$entity = Entity::Create(EntityTypes::Image, '', '');
 
 			if($mimetype == null){
@@ -199,8 +261,9 @@
 
 			$exif = ExifCollection::GetExif($destpath);
 
-			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, path, mimetype, extension, width, height, size) VALUES (:id_entity, :path, :mimetype, :extension, :width, :height, :size)");
+			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, id_type, path, mimetype, extension, width, height, size) VALUES (:id_entity, (SELECT id FROM tblImageTypes WHERE name = :type), :path, :mimetype, :extension, :width, :height, :size)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
+			$sth->bindValue('type', $type, PDO::PARAM_STR);
 			$sth->bindValue('path', $filename, PDO::PARAM_STR);
 			$sth->bindValue('mimetype', $mimetype, PDO::PARAM_STR);
 			$sth->bindValue('extension', $extension, PDO::PARAM_STR);
@@ -212,6 +275,7 @@
 				$image = new Image(Database::LastInsertId(), false, $entity);
 				$image->filePath = $filename;
 				$image->mimeType = $mimetype;
+				$image->extension = $extension;
 				$image->dimensions = new Dimensions($exif->Width, $exif->Height);
 				$image->exif = $exif;
 				$image->loaded = true;

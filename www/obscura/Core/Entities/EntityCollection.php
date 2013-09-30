@@ -52,7 +52,7 @@
 			if($entity == null){
 				$this->entityid = null;
 
-				$sth = Database::Prepare("SELECT id, id_type, title, description, hits, dtCreated, dtModified, tfActive FROM tblEntities WHERE id_type = (SELECT id FROM tblEntityTypes WHERE name = :type)");
+				$sth = Database::Prepare("SELECT id, TypeId, Title, Description, Hits, CreatedOn, ModifiedOn, IsActive FROM vwEntities WHERE type = :type");
 				$sth->bindParam('type', $memberType, PDO::PARAM_STR);
 				$sth->execute();
 
@@ -60,14 +60,14 @@
 				while(($member = $sth->fetch()) != null)
 					$this->members[$member->id] = Entity::Build(
 						$member->id,
-						$member->id_type,
+						$member->TypeId,
 						$memberType,
-						$member->title,
-						$member->description,
-						$member->hits,
-						$member->dtCreated,
-						$member->dtModified,
-						$member->tfActive
+						$member->Title,
+						$member->Description,
+						$member->Hits,
+						$member->CreatedOn,
+						$member->ModifiedOn,
+						$member->IsActive
 					);
 			}
 			else{

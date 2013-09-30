@@ -30,17 +30,19 @@
 			return $this->tags;
 		}
 
-		public function __construct($entity){
+		public function __construct($entity, $load = true){
 			$this->entityid = (is_numeric($entity) ? $entity : $entity->Id);
-
-			$sth = Database::Prepare("SELECT Tag FROM vwEntityTags WHERE EntityId = :id");
-			$sth->bindValue('id', $this->entityid, PDO::PARAM_INT);
-			$sth->setFetchMode(PDO::FETCH_OBJ);
-			$sth->execute();
-
 			$this->tags = array();
-			while(($tag = $sth->fetch()) != null)
-				$this->tags[] = $tag->Tag;
+
+			if($load){
+				$sth = Database::Prepare("SELECT Tag FROM vwEntityTags WHERE EntityId = :id");
+				$sth->bindValue('id', $this->entityid, PDO::PARAM_INT);
+				$sth->setFetchMode(PDO::FETCH_OBJ);
+				$sth->execute();
+
+				while(($tag = $sth->fetch()) != null)
+					$this->tags[] = $tag->Tag;
+			}
 		}
 
 		public function Contains($tag){

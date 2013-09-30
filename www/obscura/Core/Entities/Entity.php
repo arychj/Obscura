@@ -116,7 +116,7 @@
 			if(strlen($this->title) > 0)
 				$vars['title'] = $this->title;
 
-			if(strlen($this->title) > 0)
+			if(strlen($this->description) > 0)
 				$vars['description'] = $this->description;
 
 			return $vars;

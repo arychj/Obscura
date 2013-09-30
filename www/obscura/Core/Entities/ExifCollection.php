@@ -111,7 +111,6 @@
 
 		public function SaveToEntity($entity){
 			$sth = Database::Prepare("INSERT INTO tblExifData (id_entity, id_type, value) VALUES (:id_entity, (SELECT id FROM tblExifTypes WHERE name = :name), :value)");
-
 			foreach($this->tags as $name => $value){
 				$sth->execute(array(
 					'id_entity' => $entity->Id,

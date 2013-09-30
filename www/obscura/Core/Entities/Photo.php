@@ -152,17 +152,17 @@
 		}
 
 		public static function Create($title, $description, $photo, $thumbnail){
-			if(get_class($photo) != 'Image')
-				throw new InvalidArgumentException();	
-			elseif(get_class($thumbnail) != 'Image')
+			if(get_class($photo) != 'Image' && $photo != null)
+				throw new InvalidArgumentException();
+			elseif(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
 
 			$entity = Entity::Create(EntityTypes::Photo, $title, $description);
 			
 			$sth = Database::Prepare("INSERT INTO tblPhotos (id_entity, id_photo, id_thumbnail) VALUES (:id_entity, :id_photo, :id_thumbnail)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_photo', $photo->Id, PDO::PARAM_INT);
-			$sth->bindValue('id_thumbnail', $thumbnail->Id, PDO::PARAM_INT);
+			$sth->bindValue('id_photo', ($photo == null ? null : $photo->Id), PDO::PARAM_INT);
+			$sth->bindValue('id_thumbnail', ($thumbnail == null ? null : $thumbnail->Id), PDO::PARAM_INT);
 			$sth->execute();
 
 			$photo = new Photo($entity->Id, false, $entity);
@@ -173,13 +173,24 @@
 		}
 
 		public static function CreateFromFile($title, $description, $path, $mimetype = null){
-			$image = Image::Create($path, false, $mimetype);
-			$thumbnail = $image->GenerateThumbnail();
 			$title = preg_replace('/\\.[^.\\s]{3,4}$/', '', $title);
+			$original = Image::Create($path, false, $mimetype, 'Original');
 
-			$photo = self::Create(($image->Exif->Title == '' ? $title : $image->Exif->Title), ($image->Exif->Description == '' ? $description : $image->Exif->Description), $image, $thumbnail);
-			$photo->exif = $image->Exif;
+			$photo = self::Create(($original->Exif->Title == '' ? $title : $original->Exif->Title), ($original->Exif->Description == '' ? $description : $original->Exif->Description), $original, null);
+			$photo->Resolutions->Add($original);
+			$photo->exif = $original->Exif;
 			$photo->exif->SaveToEntity($photo);
+
+			$sth = Database::Prepare('SELECT name, longEdge, shortEdge FROM tblImageTypes WHERE tfGenerate = 1');
+			$sth->execute();
+			while(($size = $sth->fetch()) != null){
+				$image = $original->Generate($size->longEdge, $size->shortEdge, $size->name, $photo->Title);
+				$photo->Resolutions->Add($image);
+
+				if($size->name == 'Thumbnail')
+					$photo->Thumbnail = $image;
+			}
+
 
 			return $photo;
 		}
