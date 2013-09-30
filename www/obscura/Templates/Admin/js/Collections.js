@@ -51,8 +51,10 @@ function LoadCollection(){
 			dataType: 'json',
 			success: function (collection){
 				LoadEntity(collection);
-				$('#cover').css('background-image', 'url(' + collection.cover.url + ')').data('id', collection.cover.id);
-				$('#thumbnail').css('background-image', 'url(' + collection.thumbnail.url + ')').data('id', collection.thumbnail.id);
+				if(collection.cover != null)
+					$('#cover').css('background-image', 'url(' + collection.cover.url + ')').data('id', collection.cover.id);
+				if(collection.thumbnail != null)
+					$('#thumbnail').css('background-image', 'url(' + collection.thumbnail.url + ')').data('id', collection.thumbnail.id);
 				$('#modalProcessing').modal('hide');
 			}
 		});
@@ -76,7 +78,7 @@ function UpdateCollection(){
 		dataType: 'json',
 		success: function(collection){
 			if(collectionid == -1){
-				$('#ddlCollections').append($('<option/>').val(collection.id).html(collection.Title));
+				$('#ddlCollections').append($('<option/>').val(collection.id).html(collection.title));
 				$('#ddlCollections').val(collection.id);
 			}
 			else{

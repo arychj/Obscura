@@ -73,8 +73,10 @@ function LoadSet(){
 			dataType: 'json',
 			success: function(set){
 				LoadEntity(set);
-				$('#cover').css('background-image', 'url(' + set.cover.url + ')');
-				$('#thumbnail').css('background-image', 'url(' + set.thumbnail.url + ')');
+				if(set.cover != null)
+					$('#cover').css('background-image', 'url(' + set.cover.url + ')');
+				if(set.thumbnail != null)
+					$('#thumbnail').css('background-image', 'url(' + set.thumbnail.url + ')');
 
 				$('#modalProcessing').modal('hide');
 			}
@@ -95,17 +97,17 @@ function UpdateSet(){
 			'description': $('#description').val(),
 			'cover': $('#cover').data('id'),
 			'thumbnail': $('#thumbnail').data('id'),
+			'parent': $('#ddlCollections').val(),
 			'active': ($('#active').is(':checked') ? 1 : 0)
 		}),
 		dataType: 'json',
 		success: function(set){
 			if(setid == -1){
-				$('#ddlSets').append($('<option/>').val(set.id).html(set.Title));
+				$('#ddlSets').append($('<option/>').val(set.id).html(set.title));
 				$('#ddlSets').val(set.id);
 			}
 			else{
 				$('#ddlSets option:selected').html(set.title);
-
 			}
 
 			$('#modalProcessing').modal('hide');
