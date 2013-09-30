@@ -130,6 +130,7 @@ function LoadPhoto(){
 				if(photo.thumbnail != null)
 					$('#thumbnail').css('background-image', 'url(' + photo.thumbnail.url + ')');
 
+				$('#exif').html('');
 				if(photo.exif != null){
 					$.each(photo.exif, function(key, value){
 						$('#exif').append(key + ': ' + value + ';');
