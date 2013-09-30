@@ -159,6 +159,7 @@
 				$this->description	= $entity->description;
 				$this->hitcount		= $entity->hitcount;
 				$this->dates		= $entity->dates;
+				$this->tags			= $entity->tags;
 				$this->active		= $entity->active;
 
 				$this->loaded = true;
@@ -258,6 +259,7 @@
 				$entity->description = $description;
 				$entity->dates = new DateTimeSet(time(), time());
 				$entity->active = true;
+				$entity->tags = new TagCollection($entity, false);
 				$entity->loaded = true;
 
 				return $entity;
@@ -276,6 +278,7 @@
 			$entity->hitcount = $hitcount;
 			$entity->dates = new DateTimeSet($dtCreated, $dtModified);
 			$entity->active = $active;
+			$entity->tags = new TagCollection($entity, false);
 			$entity->loaded = true;
 
 			return $entity;
