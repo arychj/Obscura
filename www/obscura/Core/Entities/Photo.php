@@ -107,6 +107,11 @@
 			}
 		}
 
+		public function Display($size){
+			$size = ImageSizes::Parse($size);
+
+		}
+
 		public function Update($title, $description, $thumbnail, $active){
 			if(get_class($thumbnail) != 'Image' && $thumbnail != null)
 				throw new InvalidArgumentException();
@@ -128,11 +133,6 @@
 
 		public function Delete(){
 			$this->Load();
-
-			if($this->photo != null)
-				$this->photo->Delete();
-			if($this->thumbnail != null)
-				$this->thumbnail->Delete();
 
 			foreach($this->resolutions->Members as $member)
 				$member->Delete();
@@ -163,7 +163,7 @@
 
 		public static function CreateFromFile($title, $description, $path, $mimetype = null){
 			$title = preg_replace('/\\.[^.\\s]{3,4}$/', '', $title);
-			$original = Image::Create($path, false, $mimetype, 'Original');
+			$original = Image::Create($path, false, $mimetype, ImageSizes::Original);
 
 			$photo = self::Create(($original->Exif->Title == '' ? $title : $original->Exif->Title), ($original->Exif->Description == '' ? $description : $original->Exif->Description), $original, null);
 			$photo->Resolutions->Add($original);
