@@ -23,9 +23,10 @@
 	PackageManager::Import('Core.Common.Database');
 	PackageManager::Import('Core.Common.Exceptions.ImageException');
 	PackageManager::Import('Core.Common.MimeType');
-	PackageManager::Import('Core.Entities.Entity');
 	PackageManager::Import('Core.Entities.Dimensions');
+	PackageManager::Import('Core.Entities.Entity');
 	PackageManager::Import('Core.Entities.ExifCollection');
+	PackageManager::Import('Core.Entities.ImageSizes');
 
 	class Image extends Entity {
 		private $loaded = false;
@@ -33,6 +34,7 @@
 		private $dimensions;
 		private $exif;
 		private $mimeType, $extension, $filePath, $html;
+		private $size, $sizeSymbol;
 
 		/*** accessors ***/
 
@@ -69,6 +71,16 @@
 		protected function get_Html(){
 			$this->Load();
 			return $this->html;
+		}
+
+		protected function get_Size(){
+			$this->Load();
+			return $this->size;
+		}
+
+		protected function get_SizeSymbol(){
+			$this->Load();
+			return $this0>sizeSymbol;
 		}
 
 		protected function get_Vars(){
@@ -185,23 +197,27 @@
 				}
 			}
 
-			if($destW !== null && $destH !== null && $srcX !== null && $srcY !== null && $srcW !== null && $srcH != null){
-				$image_p = imagecreatetruecolor($destW, $destH);
-				$image = imagecreatefromjpeg($filename);
-				imagecopyresampled($image_p, $image, 0, 0, $srcX, $srcY, $destW, $destH, $srcW, $srcH);
-				imagejpeg($image_p, $tempfile, 100);
+			if($destW <= $orgW && $destH <= $orgH){ 
+				if($destW !== null && $destH !== null && $srcX !== null && $srcY !== null && $srcW !== null && $srcH != null){
+					$image_p = imagecreatetruecolor($destW, $destH);
+					$image = imagecreatefromjpeg($filename);
+					imagecopyresampled($image_p, $image, 0, 0, $srcX, $srcY, $destW, $destH, $srcW, $srcH);
+					imagejpeg($image_p, $tempfile, 100);
 
-				$image = self::Create($tempfile, false, $this->mimeType, $type);
-				$image->title = $title;
+					$image = self::Create($tempfile, false, $this->mimeType, $type);
+					$image->title = $title;
 
-				@unlink($tempfile);
+					@unlink($tempfile);
 
-				return $image;
+					return $image;
+				}
+				else{
+					@unlink($tempfile);
+					throw new ImageException("Unable to generate Image. Invalid dimensions specified.");
+				}
 			}
-			else{
-				@unlink($tempfile);
-				throw new ImageException("Unable to generate Image. Invalid dimensions specified.");
-			}
+			else
+				return null;
 		}
 
 		public function GenerateThumbnail(){
@@ -220,16 +236,18 @@
 
 		private function Load(){
 			if(!$this->loaded){
-				$sth = Database::Prepare("SELECT title, path, mimeType, extension, width, height FROM vwImages WHERE id_entity = :id");
+				$sth = Database::Prepare("SELECT Size, SizeSymbol, Title, Path, MimeType, Extension, Width, Height FROM vwImages WHERE id_entity = :id");
 				$sth->bindValue('id', $this->Id, PDO::PARAM_INT);
 				$sth->execute();
 
 				if(($image = $sth->fetch()) != null){
-					$this->title = $image->title;
-					$this->filePath = $image->path;
-					$this->mimeType = $image->mimeType;
-					$this->extension = $image->extension;
-					$this->dimensions = new Dimensions($image->width, $image->height);
+					$this->size = $image->Size;
+					$this->sizeSymbol = $image->SizeSymbol;
+					$this->title = $image->Title;
+					$this->filePath = $image->Path;
+					$this->mimeType = $image->MimeType;
+					$this->extension = $image->Extension;
+					$this->dimensions = new Dimensions($image->Width, $image->Height);
 					$this->exif = ExifCollection::FromEntity($this);
 
 					$this->loaded = true;
@@ -240,7 +258,7 @@
 			}
 		}
 
-		public static function Create($sourcepath, $saveExif = false, $mimetype = null, $type = null){
+		public static function Create($sourcepath, $saveExif = false, $mimetype = null, $size = null){
 			$entity = Entity::Create(EntityTypes::Image, '', '');
 
 			if($mimetype == null){
@@ -261,15 +279,15 @@
 
 			$exif = ExifCollection::GetExif($destpath);
 
-			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, id_type, path, mimetype, extension, width, height, size) VALUES (:id_entity, (SELECT id FROM tblImageTypes WHERE name = :type), :path, :mimetype, :extension, :width, :height, :size)");
+			$sth = Database::Prepare("INSERT INTO tblImages (id_entity, id_size, path, mimetype, extension, width, height, size) VALUES (:id_entity, (SELECT id FROM tblImageSizes WHERE name = :size), :path, :mimetype, :extension, :width, :height, :filesize)");
 			$sth->bindValue('id_entity', $entity->Id, PDO::PARAM_INT);
-			$sth->bindValue('type', $type, PDO::PARAM_STR);
+			$sth->bindValue('size', $size, PDO::PARAM_STR);
 			$sth->bindValue('path', $filename, PDO::PARAM_STR);
 			$sth->bindValue('mimetype', $mimetype, PDO::PARAM_STR);
 			$sth->bindValue('extension', $extension, PDO::PARAM_STR);
 			$sth->bindValue('width', $exif->Width, PDO::PARAM_INT);
 			$sth->bindValue('height', $exif->Height, PDO::PARAM_INT);
-			$sth->bindValue('size', filesize($destpath), PDO::PARAM_INT);
+			$sth->bindValue('filesize', filesize($destpath), PDO::PARAM_INT);
 			
 			if($sth->execute()){
 				$image = new Image(Database::LastInsertId(), false, $entity);

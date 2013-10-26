@@ -174,10 +174,13 @@
 			$sth->execute();
 			while(($size = $sth->fetch()) != null){
 				$image = $original->Generate($size->longEdge, $size->shortEdge, $size->name, $photo->Title);
-				$photo->Resolutions->Add($image);
 
-				if($size->name == 'Thumbnail')
-					$photo->Thumbnail = $image;
+				if($image != null){
+					$photo->Resolutions->Add($image);
+
+					if($size->name == 'Thumbnail')
+						$photo->Thumbnail = $image;
+				}
 			}
 
 			return $photo;
