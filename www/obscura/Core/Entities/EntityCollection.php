@@ -73,7 +73,7 @@
 			else{
 				$this->entityid = (is_numeric($entity) ? $entity : $entity->Id);
 
-				$sth = Database::Prepare("SELECT id_member FROM tblMemberMap WHERE id_entity = :id_entity");
+				$sth = Database::Prepare("SELECT id_member FROM tblMemberMap WHERE id_entity = :id_entity ORDER BY memberOrder ASC, memberOrder IS NULL");
 				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
 				$sth->execute();
 
@@ -91,7 +91,7 @@
 			return $this->ContainsId($entity->Id());
 		}
 
-		public function Add($member){
+		public function Add($member, $position = null){
 			if($this->entityid != null){
 				if(is_numeric($member)){
 					$memberid = $member;
@@ -105,10 +105,14 @@
 				$sth->bindValue('id_entity', $this->entityid, PDO::PARAM_INT);
 				$sth->bindValue('id_member', $memberid, PDO::PARAM_INT);
 				if($sth->execute())
-					$this->members[] = $member;
+					$this->members[$memberid] = $member;
 			}
 			else
 				throw new EntityCollectionException("A member cannot be added to a global collection.");
+		}
+
+		public function Move($member, $position){
+
 		}
 
 		public function Remove($member){
